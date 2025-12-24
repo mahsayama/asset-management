@@ -1,0 +1,14 @@
+# Abaikan folder virtual environment
+env/
+venv/
+
+# Abaikan file sampah Python
+__pycache__/
+*.pyc
+
+# (Opsional) Abaikan database lokal biar data di server nanti fresh
+# Kalau lu mau data laptop kebawa ke server, hapus baris di bawah ini:
+db.sqlite3
+
+# Abaikan settingan VS Code
+.vscode/
