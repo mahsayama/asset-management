@@ -47,6 +47,8 @@ def asset_create(request):
         # Kalau user baru buka halaman (form kosong)
         form = AssetForm()
 
+    return render(request, 'assets/asset_form.html', {'form': form})    
+
         # --- FUNGSI EDIT ---
 @login_required
 def asset_update(request, pk):
