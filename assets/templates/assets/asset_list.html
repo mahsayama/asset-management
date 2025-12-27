@@ -29,67 +29,78 @@
                     </form>
                 </div>
             </div>
-            ```
             <div class="card-body">
                 
                 <form method="get" class="mb-4">
                     <div class="input-group">
-                        <input type="text" name="q" class="form-control" placeholder="Cari aset berdasarkan Nama, Serial Number, atau Barcode..." value="{{ query|default:'' }}">
+                        
+                        <input type="text" name="q" class="form-control" placeholder="Cari aset berdasarkan Nama, Serial Number, atau Barcode, User Sebelumnya atau User Saat Ini..." value="{{ query|default:'' }}">
                         
                         <button class="btn btn-primary" type="submit">🔍 Cari</button>
                         
                         <a href="{% url 'asset_list' %}" class="btn btn-outline-secondary">Reset</a>
                     </div>
                 </form>
-                <table class="table table-hover table-bordered">
-                ```
-                <table class="table table-hover table-bordered">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Nama Aset</th>
-                            <th>Barcode ID</th>
-                            <th>Serial Number</th>
-                            <th>Status</th>
-                            <th>Harga</th>
-                            <th>Aksi</th> </tr>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for asset in assets %}
-                        <tr>
-                            <td><strong>{{ asset.name }}</strong></td>
-                            <td>
-                                {% if asset.barcode_id %}
-                                    <span class="badge bg-secondary">{{ asset.barcode_id }}</span>
-                                {% else %}
-                                    <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ asset.serial_number }}</td>
-                            <td>
-                                {% if asset.status == 'TERSEDIA' %}
-                                    <span class="badge bg-success">Tersedia</span>
-                                {% elif asset.status == 'DIPAKAI' %}
-                                    <span class="badge bg-primary">Dipakai</span>
-                                {% elif asset.status == 'RUSAK' %}
-                                    <span class="badge bg-danger">Rusak</span>
-                                {% else %}
-                                    <span class="badge bg-warning text-dark">Hilang</span>
-                                {% endif %}
-                            </td>
-                            <td>Rp {{ asset.price }}</td>
-                            <td>
-                                <a href="{% url 'asset_update' asset.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <table class="table table-bordered table-striped text-center align-middle">
+                            <thead class="table-dark align-middle">
+                            <tr>
+                                <th>Nama Aset</th>
+                                <th>Barcode ID</th>            
+                                <th>Serial Number</th>
 
-                                <a href="{% url 'asset_delete' asset.pk %}" class="btn btn-sm btn-danger">Hapus</a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center">Belum ada data aset.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                                <th>Kategori</th>
+                                <th>Lokasi</th>
+                                <th>User Saat Ini</th>
+                                <th>Dept Saat Ini</th>
+                                <th>User Sebelumnya</th>
+                                <th>Dept Sebelumnya</th>
+                                <th>Status</th>
+                                <th>Harga</th>
+                                <th>Aksi</th> 
+                            </tr>
+                        </thead>
+                            <tbody>
+                                {% for asset in assets %}
+                                <tr>
+                                    <td><strong>{{ asset.name }}</strong></td>
+                                    <td>
+                                        {% if asset.barcode_id %}
+                                            <span class="badge bg-secondary">{{ asset.barcode_id }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ asset.serial_number }}</td>
+
+                                    <td>{{ asset.kategori|default:"-" }}</td>
+                                    <td>{{ asset.lokasi|default:"-" }}</td>
+                                    <td>{{ asset.current_user|default:"-" }}</td>
+                                    <td>{{ asset.current_dept|default:"-" }}</td>
+                                    <td>{{ asset.prev_user|default:"-" }}</td>
+                                    <td>{{ asset.prev_dept|default:"-" }}</td>
+                                    <td>
+                                        {% if asset.status == 'TERSEDIA' %}
+                                            <span class="badge bg-success">Tersedia</span>
+                                        {% elif asset.status == 'DIPAKAI' %}
+                                            <span class="badge bg-primary">Dipakai</span>
+                                        {% elif asset.status == 'RUSAK' %}
+                                            <span class="badge bg-danger">Rusak</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Hilang</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>Rp {{ asset.price }}</td>
+                                    <td>
+                                        <a href="{% url 'asset_update' asset.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{% url 'asset_delete' asset.pk %}" class="btn btn-sm btn-danger">Hapus</a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="12" class="text-center">Belum ada data aset.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                 </table>
 
             </div>

@@ -22,7 +22,9 @@ def asset_list(request):
         assets = Asset.objects.filter(
             Q(name__icontains=query) | 
             Q(serial_number__icontains=query) |
-            Q(barcode_id__icontains=query)
+            Q(barcode_id__icontains=query) |
+            Q(current_user__icontains=query) |
+            Q(prev_user__icontains=query)
         ).order_by('-created_at')
     else:
         # Kalau gak nyari apa-apa, ambil semua kayak biasa

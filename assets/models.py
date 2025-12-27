@@ -1,6 +1,28 @@
 from django.db import models
 
 class Asset(models.Model):
+    # --- Opsi Pilihan Kategori ---
+    KATEGORI_CHOICES = [
+        ('Laptop', 'Laptop'),
+        ('PC', 'PC'),
+        ('Printer', 'Printer'),
+        ('Scanner', 'Scanner'),
+        ('Server', 'Server'),
+        ('Network', 'Network'),
+        ('UPS', 'UPS'),
+        ('Handphone', 'Handphone'),
+        ('Tablet', 'Tablet'),
+        ('Webcam', 'Webcam'),
+        ('Speaker', 'Speaker'),
+    ]
+
+    # --- Opsi Pilihan Lokasi ---
+    LOKASI_CHOICES = [
+        ('Gedung 32', 'Gedung 32'),
+        ('Gedung 34', 'Gedung 34'),
+        ('Gedung 38', 'Gedung 38'),
+        ('Gedung 39', 'Gedung 39'),
+    ]
     # Pilihan status aset
     STATUS_CHOICES = [
         ('TERSEDIA', 'Tersedia'),
@@ -12,6 +34,26 @@ class Asset(models.Model):
     name = models.CharField(max_length=200, verbose_name="Nama Aset") 
     barcode_id = models.CharField(max_length=100, verbose_name="ID Barcode", blank=True, null=True)
     serial_number = models.CharField(max_length=100, unique=True, verbose_name="Nomor Seri")
+    # --- FIELD BARU (Ide Lu) ---
+    kategori = models.CharField(max_length=50, choices=KATEGORI_CHOICES)
+    lokasi = models.CharField(max_length=50, choices=LOKASI_CHOICES)
+
+    def __str__(self):
+        return f"{self.nama_barang} - {self.kategori}"
+    
+    # Pengguna Saat Ini
+    current_user = models.CharField(max_length=100, null=True, blank=True, verbose_name="Pengguna Saat Ini")
+    current_dept = models.CharField(max_length=100, null=True, blank=True, verbose_name="Dept/Divisi Saat Ini")
+    
+    # Pengguna Sebelumnya
+    prev_user = models.CharField(max_length=100, null=True, blank=True, verbose_name="Pengguna Sebelumnya")
+    prev_dept = models.CharField(max_length=100, null=True, blank=True, verbose_name="Dept/Divisi Sebelumnya")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
     purchase_date = models.DateField(verbose_name="Tanggal Beli")
     price = models.DecimalField(max_digits=15, decimal_places=0, verbose_name="Harga")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TERSEDIA')
