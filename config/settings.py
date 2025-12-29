@@ -1,3 +1,4 @@
+import os
 """
 Django settings for config project.
 
@@ -121,6 +122,10 @@ STATIC_URL = 'static/'
 # --- SETTING LOGIN ---
 # Kalau user belum login, lempar ke sini:
 LOGIN_URL = 'login' 
+# TAMBAHIN INI BIAR DJANGO TAU LOKASI FOLDER LO
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Kalau BERHASIL login, lempar ke sini:
 LOGIN_REDIRECT_URL = 'asset_list'
