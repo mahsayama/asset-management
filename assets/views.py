@@ -1,6 +1,7 @@
 import openpyxl # <--- Import alat barunya
 from django.http import HttpResponse # <--- Buat ngirim file ke browser
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Count # <--- Pastikan import ini ada
 from .models import Asset
 from .forms import AssetForm
 # --- 1. Import Gembok ---
@@ -29,6 +30,20 @@ def asset_list(request):
     else:
         # Kalau gak nyari apa-apa, ambil semua kayak biasa
         assets = Asset.objects.all().order_by('-created_at')
+
+# --- LOGIKA HITUNG STATUS (TAMBAHKAN INI) ---
+    # Kita hitung berdasarkan filter status
+    # Sesuaikan teks 'DIPAKAI', 'RUSAK', 'HILANG' dengan isi database lo
+    context = {
+        'assets': assets,
+        'query': query,
+        'total_count': assets.count(),
+        'dipakai_count': assets.filter(status='DIPAKAI').count(),
+        'rusak_count': assets.filter(status='RUSAK').count(),
+        'hilang_count': assets.filter(status='HILANG').count(),
+    }
+    
+    return render(request, 'assets/asset_list.html', context)
 
     context = {
         'assets': assets,
