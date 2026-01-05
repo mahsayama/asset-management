@@ -134,27 +134,28 @@
             </div>
         </div>
 
-        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-    <div class="d-flex align-items-center gap-2">
-        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
-            <i class="bi bi-box-seam me-1"></i> Total Aset: {{ total_count|default:assets.count }}
-        </span>
+        <div class="card">
+            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
+                        <i class="bi bi-box-seam me-1"></i> Total Aset: {{ total_count|default:assets.count }}
+                    </span>
 
-        <div class="d-flex align-items-center px-3 py-2 rounded-pill bg-light border text-secondary text-nowrap">
-            <i class="bi bi-person-circle me-2"></i>
-            <span class="fw-medium">Halo, {{ user.username }}!</span>
-        </div>
-    </div>
-    
-    <div class="d-flex gap-2 w-100 w-md-auto">
-        <a href="{% url 'export_excel' %}" class="btn btn-success text-white btn-sm fw-medium flex-fill flex-md-grow-0"> 
-            <i class="bi bi-file-earmark-excel me-1"></i> Export to Excel
-        </a>
-        <a href="{% url 'asset_create' %}" class="btn btn-primary btn-sm fw-medium flex-fill flex-md-grow-0">
-            <i class="bi bi-plus-lg me-1"></i> Tambah Baru
-        </a>
-    </div>
-</div>
+                    <div class="d-flex align-items-center px-3 py-2 rounded-pill bg-light border text-secondary text-nowrap">
+                        <i class="bi bi-person-circle me-2"></i>
+                        <span class="fw-medium">Halo, {{ user.username }}!</span>
+                    </div>
+                </div>
+                
+                <div class="d-flex gap-2 w-100 w-md-auto">
+                    <a href="{% url 'export_excel' %}" class="btn btn-success text-white btn-sm fw-medium flex-fill flex-md-grow-0"> 
+                        <i class="bi bi-file-earmark-excel me-1"></i> Export to Excel
+                    </a>
+                    <a href="{% url 'asset_create' %}" class="btn btn-primary btn-sm fw-medium flex-fill flex-md-grow-0">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah Baru
+                    </a>
+                </div>
+            </div>
 
             <div class="card-body p-4">
                 <form method="get" class="mb-4">
@@ -178,8 +179,7 @@
                                 <th class="d-none d-xl-table-cell text-muted">History User</th> 
                                 <th>Status</th>
                                 <th class="d-none d-lg-table-cell">Harga</th>
-                                <th style="min-width: 100px;">Aksi</th> 
-                            </tr>
+                                <th style="min-width: 120px;">Aksi</th> </tr>
                         </thead>
                         <tbody>
                             {% for asset in assets %}
@@ -207,7 +207,7 @@
                                 <td>
                                     {% if asset.status == 'TERSEDIA' %}
                                         <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-2 py-1 fw-medium">Tersedia</span>
-                                    {% elif asset.status == 'SEDANG DIPAKAI' %}
+                                    {% elif asset.status == 'DIPAKAI' %}
                                         <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1 fw-medium">Sedang Dipakai</span>
                                     {% elif asset.status == 'RUSAK' %}
                                         <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-2 py-1 fw-medium">Rusak</span>
@@ -217,6 +217,10 @@
                                 </td>
                                 <td class="d-none d-lg-table-cell font-monospace">Rp {{ asset.price }}</td>
                                 <td>
+                                    <a href="{% url 'asset_detail' asset.pk %}" class="btn btn-action btn-info text-white shadow-sm mx-1" title="Lihat Detail & History" data-bs-toggle="tooltip">
+                                        <i class="bi bi-eye-fill small"></i>
+                                    </a>
+
                                     <a href="{% url 'asset_update' asset.pk %}" class="btn btn-action btn-warning text-white shadow-sm mx-1" title="Edit" data-bs-toggle="tooltip">
                                         <i class="bi bi-pencil-fill small"></i>
                                     </a>

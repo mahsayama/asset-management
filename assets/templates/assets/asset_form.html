@@ -1,4 +1,5 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
+{% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-10">
         
@@ -19,15 +20,28 @@
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Ups! Ada data yang kurang pas:</strong>
+                            <ul class="mb-0 mt-2 small">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li><b>{{ field.label }}:</b> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     {% endif %}
 
                     <div class="row g-4">
                         <div class="col-12"><h6 class="text-primary fw-bold text-uppercase small border-bottom pb-2 mb-3">Identitas Aset</h6></div>
                         
                         <div class="col-12">
-                            <label class="fw-medium text-secondary small mb-1">Nama Aset</label>
+                            <label class="fw-medium text-secondary small mb-1">Nama Aset <span class="text-danger">*</span></label>
                             {{ form.name }}
                         </div>
                         <div class="col-md-6">
@@ -35,7 +49,7 @@
                             {{ form.barcode_id }}
                         </div>
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Serial Number</label>
+                            <label class="fw-medium text-secondary small mb-1">Serial Number <span class="text-danger">*</span></label>
                             {{ form.serial_number }}
                         </div>
 
@@ -49,11 +63,18 @@
                             <label class="fw-medium text-secondary small mb-1">Lokasi</label>
                             {{ form.lokasi }}
                         </div>
+                        
                         <div class="col-md-6">
                             <label class="fw-medium text-secondary small mb-1">Status</label>
                             {{ form.status }}
                         </div>
+
                         <div class="col-md-6">
+                            <label class="fw-medium text-secondary small mb-1">Tanggal Pembelian <span class="text-danger">*</span></label>
+                            {{ form.purchase_date }}
+                        </div>
+
+                        <div class="col-12">
                             <label class="fw-medium text-secondary small mb-1">Harga (Rp)</label>
                             {{ form.price }}
                         </div>
@@ -79,10 +100,8 @@
 
                         <div class="col-12">
                             <label class="fw-medium text-secondary small mb-1">Keterangan</label>
-                            
                             {{ form.note}} 
-                            
-                            </div>
+                        </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
@@ -110,6 +129,10 @@
             }
             if (input.type === 'checkbox') {
                 input.classList.add('form-check-input');
+            }
+            // Khusus Tanggal Beli biar muncul kalender di browser modern
+            if (input.name === 'purchase_date') {
+                input.type = 'date'; 
             }
         });
     });
