@@ -1,9 +1,7 @@
 {% extends 'base.html' %} 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-10">
-        
-        <div class="mb-4">
+    <div class="col-lg-10 col-xl-9"> <div class="mb-4">
             <a href="{% url 'asset_list' %}" class="text-decoration-none text-muted small hover-primary">
                 <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
             </a>
@@ -15,98 +13,140 @@
             </h3>
         </div>
 
-        <div class="card shadow-sm">
+        <div class="card shadow-sm border-0 rounded-4">
             <div class="card-body p-4 p-md-5">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
                     {% if form.errors %}
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <strong>Ups! Ada data yang kurang pas:</strong>
-                            <ul class="mb-0 mt-2 small">
-                                {% for field in form %}
-                                    {% for error in field.errors %}
-                                        <li><b>{{ field.label }}:</b> {{ error }}</li>
-                                    {% endfor %}
-                                {% endfor %}
-                                {% for error in form.non_field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
+                        <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+                            <div class="d-flex gap-3">
+                                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                                <div>
+                                    <strong>Ups! Ada data yang kurang pas:</strong>
+                                    <ul class="mb-0 mt-1 small">
+                                        {% for field in form %}
+                                            {% for error in field.errors %}
+                                                <li><b>{{ field.label }}:</b> {{ error }}</li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     {% endif %}
 
-                    <div class="row g-4">
-                        <div class="col-12"><h6 class="text-primary fw-bold text-uppercase small border-bottom pb-2 mb-3">Identitas Aset</h6></div>
+                    <div class="row g-4 gx-lg-5"> 
                         
                         <div class="col-12">
-                            <label class="fw-medium text-secondary small mb-1">Nama Aset <span class="text-danger">*</span></label>
+                            <div class="d-flex align-items-center gap-2 border-bottom pb-2 mb-2">
+                                <i class="bi bi-upc-scan text-primary"></i>
+                                <h6 class="text-primary fw-bold text-uppercase small mb-0">Identitas Aset</h6>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="fw-medium text-secondary small mb-2">Nama Aset <span class="text-danger">*</span></label>
                             {{ form.name }}
                         </div>
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">ID Barcode</label>
+                            <label class="fw-medium text-secondary small mb-2">ID Barcode</label>
                             {{ form.barcode_id }}
+                            <div class="form-text small text-muted fst-italic">Kosongkan jika auto-generate.</div>
                         </div>
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Serial Number <span class="text-danger">*</span></label>
+                            <label class="fw-medium text-secondary small mb-2">Serial Number <span class="text-danger">*</span></label>
                             {{ form.serial_number }}
                         </div>
 
-                        <div class="col-12 mt-4"><h6 class="text-primary fw-bold text-uppercase small border-bottom pb-2 mb-3">Detail & Lokasi</h6></div>
+                        <div class="col-12 mt-4">
+                            <div class="d-flex align-items-center gap-2 border-bottom pb-2 mb-2">
+                                <i class="bi bi-geo-alt text-primary"></i>
+                                <h6 class="text-primary fw-bold text-uppercase small mb-0">Lokasi & Status</h6>
+                            </div>
+                        </div>
 
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Kategori</label>
+                            <label class="fw-medium text-secondary small mb-2">Kategori</label>
                             {{ form.kategori }}
                         </div>
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Lokasi</label>
+                            <label class="fw-medium text-secondary small mb-2">Lokasi Penempatan</label>
                             {{ form.lokasi }}
                         </div>
                         
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Status</label>
+                            <label class="fw-medium text-secondary small mb-2">Status Kondisi</label>
                             {{ form.status }}
                         </div>
 
+                        <div class="col-12 mt-4">
+                            <div class="d-flex align-items-center gap-2 border-bottom pb-2 mb-2">
+                                <i class="bi bi-cash-coin text-primary"></i>
+                                <h6 class="text-primary fw-bold text-uppercase small mb-0">Data Pembelian (Opsional)</h6>
+                            </div>
+                        </div>
+
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Tanggal Pembelian <span class="text-danger">*</span></label>
+                            <label class="fw-medium text-secondary small mb-2">Tanggal Pembelian</label>
                             {{ form.purchase_date }}
-                        </div>
+                            </div>
 
-                        <div class="col-12">
-                            <label class="fw-medium text-secondary small mb-1">Harga (Rp)</label>
+                        <div class="col-md-6">
+                            <label class="fw-medium text-secondary small mb-2">Harga Aset (Rp)</label>
                             {{ form.price }}
+                             </div>
+
+                        <div class="col-12 mt-4">
+                            <div class="d-flex align-items-center gap-2 border-bottom pb-2 mb-2">
+                                <i class="bi bi-people text-primary"></i>
+                                <h6 class="text-primary fw-bold text-uppercase small mb-0">Pengguna (User)</h6>
+                            </div>
                         </div>
 
-                        <div class="col-12 mt-4"><h6 class="text-primary fw-bold text-uppercase small border-bottom pb-2 mb-3">Pengguna</h6></div>
-
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">User Saat Ini</label>
-                            {{ form.current_user }}
+                            <div class="p-3 bg-light rounded-3 border">
+                                <label class="fw-bold text-dark small mb-2 d-block">User Saat Ini</label>
+                                <div class="mb-3">
+                                    <label class="text-muted small mb-1">Nama User / PIC</label>
+                                    {{ form.current_user }}
+                                </div>
+                                <div>
+                                    <label class="text-muted small mb-1">Departemen</label>
+                                    {{ form.current_dept }}
+                                </div>
+                            </div>
                         </div>
+                        
                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Dept Saat Ini</label>
-                            {{ form.current_dept }}
-                        </div>
-                         <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">User Sebelumnya</label>
-                            {{ form.prev_user }}
-                        </div>
-                        <div class="col-md-6">
-                            <label class="fw-medium text-secondary small mb-1">Dept Sebelumnya</label>
-                            {{ form.prev_dept }}
+                            <div class="p-3 bg-white rounded-3 border border-dashed">
+                                <label class="fw-bold text-muted small mb-2 d-block">User Sebelumnya (History)</label>
+                                <div class="mb-3">
+                                    <label class="text-muted small mb-1">Nama User Lama</label>
+                                    {{ form.prev_user }}
+                                </div>
+                                <div>
+                                    <label class="text-muted small mb-1">Departemen Lama</label>
+                                    {{ form.prev_dept }}
+                                </div>
+                            </div>
                         </div>
 
                         <div class="col-12">
-                            <label class="fw-medium text-secondary small mb-1">Keterangan</label>
+                            <label class="fw-medium text-secondary small mb-2">Keterangan Tambahan</label>
                             {{ form.note}} 
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
-                        <a href="{% url 'asset_list' %}" class="btn btn-light border px-4 fw-medium">Batal</a>
-                        <button type="submit" class="btn btn-primary px-5 shadow-sm fw-medium">Simpan</button>
+                        <a href="{% url 'asset_list' %}" class="btn btn-light border px-4 fw-medium rounded-pill">Batal</a>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm fw-medium rounded-pill">
+                            <i class="bi bi-save me-1"></i> Simpan Data
+                        </button>
                     </div>
                 </form>
             </div>
@@ -121,16 +161,17 @@
     document.addEventListener("DOMContentLoaded", function() {
         var inputs = document.querySelectorAll('input, select, textarea');
         inputs.forEach(function(input) {
-            // Kita cek dulu biar ga double class
+            // Styling standar Bootstrap
             if (!input.classList.contains('form-control') && input.type !== 'checkbox') {
                 input.classList.add('form-control');
-                input.classList.add('bg-light');
-                input.classList.add('border-0');
+                input.classList.add('bg-white'); // Ganti jadi putih biar lebih clean
+                input.classList.add('shadow-sm'); // Kasih shadow dikit
+                input.style.padding = "0.7rem 1rem"; // Padding dalam input biar gak gepeng
             }
             if (input.type === 'checkbox') {
                 input.classList.add('form-check-input');
             }
-            // Khusus Tanggal Beli biar muncul kalender di browser modern
+            // Datepicker
             if (input.name === 'purchase_date') {
                 input.type = 'date'; 
             }

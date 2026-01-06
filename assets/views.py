@@ -1,79 +1,120 @@
-import openpyxl # <--- Import alat barunya
-from django.http import HttpResponse # <--- Buat ngirim file ke browser
+import openpyxl 
+from django.http import HttpResponse 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Count # <--- Pastikan import ini ada
-from django.db import transaction  # <--- INI BIASANYA KETINGGALAN
-from .models import Asset, AssetHistory # <--- PASTIIN AssetHistory UDAH DITULIS
+from django.db.models import Count, Q 
+from django.db import transaction 
+from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from .models import Asset, AssetHistory
 from .forms import AssetForm
-# --- 1. Import Gembok ---
-from django.contrib.auth.decorators import login_required 
-from django.db.models import Q  # <--- 1. WAJIB IMPORT INI (Huruf Q Besar)
 
-
-# --- 2. Pasang Gembok di Atas Setiap Fungsi ---
-
+# --- 1. HALAMAN LIST (DASHBOARD) ---
 @login_required
 def asset_list(request):
-    # Ambil kata kunci dari kotak pencarian (kalau ada)
+    # --- A. AMBIL PARAMETER DARI URL ---
     query = request.GET.get('q')
+    per_page = request.GET.get('per_page', '10')
+    category_filter = request.GET.get('category')
+    location_filter = request.GET.get('location')
+    status_filter = request.GET.get('status')
 
+    # --- B. QUERY DATABASE ---
+    assets_list = Asset.objects.all().order_by('-created_at')
+
+    # Filter Search Teks
     if query:
-        # Kalau user lagi nyari sesuatu:
-        # Cari di Nama ATAU Serial Number ATAU Barcode ID
-        # icontains = case insensitive (huruf besar/kecil dianggap sama)
-        assets = Asset.objects.filter(
-            Q(name__icontains=query) | 
+        assets_list = assets_list.filter(
+            Q(name__icontains=query) |
             Q(serial_number__icontains=query) |
             Q(barcode_id__icontains=query) |
-            Q(current_user__icontains=query) |
-            Q(prev_user__icontains=query)
-        ).order_by('-created_at')
-    else:
-        # Kalau gak nyari apa-apa, ambil semua kayak biasa
-        assets = Asset.objects.all().order_by('-created_at')
+            Q(current_user__icontains=query)
+        )
 
-# --- LOGIKA HITUNG STATUS (TAMBAHKAN INI) ---
-    # Kita hitung berdasarkan filter status
-    # Sesuaikan teks 'DIPAKAI', 'RUSAK', 'HILANG' dengan isi database lo
-    context = {
-        'assets': assets,
-        'query': query,
-        'total_count': assets.count(),
-        'dipakai_count': assets.filter(status='DIPAKAI').count(),
-        'rusak_count': assets.filter(status='RUSAK').count(),
-        'hilang_count': assets.filter(status='HILANG').count(),
-    }
+    # Filter Dropdown
+    if category_filter:
+        assets_list = assets_list.filter(kategori=category_filter)
     
-    return render(request, 'assets/asset_list.html', context)
+    if location_filter:
+        assets_list = assets_list.filter(lokasi=location_filter)
 
+    if status_filter:
+        assets_list = assets_list.filter(status=status_filter)
+
+    # --- C. PAGINATION ---
+    paginator = Paginator(assets_list, per_page)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # --- D. CONTEXT DATA ---
     context = {
-        'assets': assets,
-        'query': query # Kirim balik kata kuncinya biar tetep nongol di kotak search
+        'assets': page_obj,
+        'query': query,
+        'per_page': per_page,
+        'category_filter': category_filter,
+        'location_filter': location_filter,
+        'status_filter': status_filter,
+        'kategori_choices': Asset.KATEGORI_CHOICES,
+        'lokasi_choices': Asset.LOKASI_CHOICES,
+        'status_choices': Asset.STATUS_CHOICES,
+        
+        # Statistik Card
+        'total_count': Asset.objects.count(),
+        'tersedia_count': Asset.objects.filter(status='TERSEDIA').count(),
+        'dipakai_count': Asset.objects.filter(status='DIPAKAI').count(),
+        'rusak_count': Asset.objects.filter(status='RUSAK').count(),
+        'hilang_count': Asset.objects.filter(status='HILANG').count(),
     }
+
+    # --- E. LOGIC HTMX ---
+    # Kalau request dari HTMX, render tabelnya doang (Partial)
+    if request.headers.get('HX-Request'):
+        return render(request, 'assets/asset_table_partial.html', context)
+
+    # Kalau refresh biasa, render halaman full
     return render(request, 'assets/asset_list.html', context)
 
-    # --- FUNGSI BARU ---
+
+# --- 2. DETAIL ASET ---
+@login_required
+def asset_detail(request, pk):
+    asset = get_object_or_404(Asset, pk=pk)
+    
+    # PERBAIKAN DI SINI:
+    # Ganti '-changed_at' jadi '-event_date'
+    history_list = asset.history.all().order_by('-event_date') 
+    
+    return render(request, 'assets/asset_detail.html', {
+        'asset': asset,
+        'history_list': history_list
+    })
+
+
+# --- 3. TAMBAH ASET ---
 @login_required
 def asset_create(request):
     if request.method == 'POST':
-        # Kalau user klik tombol Save
         form = AssetForm(request.POST)
         if form.is_valid():
-            form.save() # Simpan ke database
-            return redirect('asset_list') # Balik ke halaman list
+            asset = form.save()
+            # Catat history pembuatan awal
+            AssetHistory.objects.create(
+                asset=asset,
+                changed_by=request.user,
+                description="Aset baru ditambahkan ke sistem."
+            )
+            return redirect('asset_list')
     else:
-        # Kalau user baru buka halaman (form kosong)
         form = AssetForm()
 
     return render(request, 'assets/asset_form.html', {'form': form})    
 
-        # --- FUNGSI EDIT ---
+
+# --- 4. EDIT ASET (AUTO HANDOVER) ---
 @login_required
 def asset_update(request, pk):
-    # 1. Ambil data asli dari database (Sebelum diedit)
     asset_obj = get_object_or_404(Asset, pk=pk)
     
-    # Simpan user lama di variabel sementara
+    # Snapshot data lama
     old_current_user = asset_obj.current_user 
     old_current_dept = asset_obj.current_dept
 
@@ -84,21 +125,14 @@ def asset_update(request, pk):
             if form.has_changed():
                 changes = []
                 
-                # --- LOGIKA OTOMATIS PINDAH USER (AUTO HANDOVER) ---
-                # Cek apakah field 'current_user' ada dalam daftar perubahan?
+                # Cek Handover User
                 if 'current_user' in form.changed_data:
-                    # Ambil instance tapi jangan save ke DB dulu
                     temp_asset = form.save(commit=False)
-                    
-                    # Pindahkan user lama ke kolom 'prev_user'
                     temp_asset.prev_user = old_current_user
-                    # Pindahkan dept lama ke kolom 'prev_dept' (opsional)
                     temp_asset.prev_dept = old_current_dept
-                    
-                    # Tambahin catatan ke changes biar masuk history
-                    changes.append(f"Handover aset: '{old_current_user}' pindah jadi User Sebelumnya.")
+                    changes.append(f"Handover: '{old_current_user}' -> User Sebelumnya.")
                 
-                # --- LOGIKA DETEKSI PERUBAHAN LAIN ---
+                # Cek Perubahan Lain
                 for field in form.changed_data:
                     field_label = form.fields[field].label or field
                     new_value = form.cleaned_data.get(field)
@@ -106,15 +140,14 @@ def asset_update(request, pk):
                     if field == 'status':
                          new_value = dict(Asset.STATUS_CHOICES).get(new_value, new_value)
                     
-                    if new_value is None:
-                        new_value = "-"
-                        
-                    changes.append(f"{field_label} diubah menjadi '{new_value}'")
+                    if new_value is None: new_value = "-"
+                    
+                    # Jangan catat user lagi disini biar ga double log
+                    if field != 'current_user' and field != 'prev_user': 
+                        changes.append(f"{field_label} diubah jadi '{new_value}'")
                 
                 with transaction.atomic():
-                    # Save aset yang sudah diupdate (termasuk prev_user otomatis tadi)
                     asset = form.save()
-                    
                     AssetHistory.objects.create(
                         asset=asset,
                         changed_by=request.user,
@@ -129,25 +162,22 @@ def asset_update(request, pk):
         
     return render(request, 'assets/asset_form.html', {'form': form})
 
-# --- FUNGSI HAPUS ---
+
+# --- 5. HAPUS ASET ---
 @login_required
 def asset_delete(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
     
     if request.method == 'POST':
-        # Hapus asetnya
         asset.delete()
         return redirect('asset_list')
     
-    # Tampilkan halaman konfirmasi sebelum hapus
     return render(request, 'assets/asset_confirm_delete.html', {'asset': asset})
-    
-    return render(request, 'assets/asset_form.html', {'form': form})
 
-# --- FUNGSI EXPORT TO EXCEL---
+
+# --- 6. EXPORT EXCEL ---
 @login_required
 def export_excel(request):
-    # 1. Setup Workbook (Buku Kerja Excel)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="Laporan_Aset.xlsx"'
 
@@ -155,40 +185,28 @@ def export_excel(request):
     worksheet = workbook.active
     worksheet.title = 'Data Aset'
 
-    # 2. Bikin Header (Judul Kolom)
-    headers = ['Nama Aset', 'Barcode ID', 'Serial Number', 'Status', 'Tanggal Beli', 'Harga', 'Keterangan']
+    # Header
+    headers = ['Nama Aset', 'Barcode ID', 'Serial Number', 'Status', 'Tanggal Beli', 'Harga', 'User', 'Keterangan']
     worksheet.append(headers)
 
-    # (Opsional) Tebalin huruf Header biar ganteng
+    # Styling Header Bold
     for cell in worksheet[1]:
         cell.font = openpyxl.styles.Font(bold=True)
 
-    # 3. Ambil Data dari Database
-    # (Kita ambil semua data, kalau mau filter bisa disesuaikan nanti)
+    # Data
     assets = Asset.objects.all().order_by('-created_at')
 
-    # 4. Masukin Data baris per baris
     for asset in assets:
         worksheet.append([
             asset.name,
             asset.barcode_id,
             asset.serial_number,
-            asset.get_status_display(), # Biar muncul "Tersedia" bukan "TERSEDIA"
+            asset.get_status_display(),
             asset.purchase_date,
             asset.price,
+            asset.current_user,
             asset.note
         ])
 
-    # 5. Simpan dan kirim ke browser
     workbook.save(response)
     return response
-
-@login_required
-def asset_detail(request, pk):
-    asset = get_object_or_404(Asset, pk=pk)
-    history_list = asset.history.all() # Ambil semua history aset ini
-    
-    return render(request, 'assets/asset_detail.html', {
-        'asset': asset,
-        'history_list': history_list
-    })

@@ -42,8 +42,10 @@ class Asset(models.Model):
     kategori = models.CharField(max_length=50, choices=KATEGORI_CHOICES)
     lokasi = models.CharField(max_length=50, choices=LOKASI_CHOICES)
     
-    purchase_date = models.DateField(verbose_name="Tanggal Beli")
-    price = models.DecimalField(max_digits=15, decimal_places=0, verbose_name="Harga")
+    # --- PERUBAHAN DISINI (BIAR BISA KOSONG) ---
+    purchase_date = models.DateField(verbose_name="Tanggal Beli", null=True, blank=True) 
+    price = models.DecimalField(max_digits=15, decimal_places=0, verbose_name="Harga", null=True, blank=True)
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='TERSEDIA')
     note = models.TextField(blank=True, null=True, verbose_name="Keterangan")
 
@@ -65,7 +67,6 @@ class Asset(models.Model):
 
 # --- MODEL HISTORY (AUDIT LOG) ---
 class AssetHistory(models.Model):
-    # PERHATIKAN: Ini semua menjorok ke dalam (Indented)
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name='history')
     changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) 
     event_date = models.DateTimeField(default=timezone.now)
