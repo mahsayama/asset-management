@@ -1,188 +1,78 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Aset IT</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+{% extends 'base.html' %}
 
-    <style>
-        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
-        .stat-card { border: none; border-radius: 16px; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-5px); }
-        .card { border: none; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
-        .card-header { background: #ffffff; border-bottom: 1px solid #edf2f7; border-radius: 16px 16px 0 0 !important; padding: 1.5rem; }
-        
-        /* CSS KHUSUS HTMX LOADING */
-        .htmx-indicator{
-            opacity: 0;
-            transition: opacity 200ms ease-in;
-        }
-        .htmx-request .htmx-indicator{
-            opacity: 1;
-        }
-        .htmx-request.fade-in {
-            opacity: 0.5;
-            pointer-events: none;
-        }
-    </style>
-</head>
-<body>
+{% block title %}Inventory Aset{% endblock %}
+{% block subtitle %}Kelola database seluruh aset IT.{% endblock %}
 
-    <div class="container py-5">
-        
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold mb-1 text-dark">Asset Management System</h3>
-                <p class="text-muted small mb-0">Manage inventory aset IS Division</p>
-            </div>
-            <div>
-                 <form action="{% url 'logout' %}" method="post" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-medium">
-                        <i class="bi bi-box-arrow-right me-1"></i> Logout
-                    </button>
-                </form>
-            </div>
+{% block content %}
+<div class="fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex gap-2">
+            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
+                <i class="bi bi-box-seam me-1"></i> Total Data: {{ assets.paginator.count }} Unit
+            </span>
         </div>
-
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card bg-white shadow-sm border-0">
-                    <div class="card-body p-3 d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-success bg-opacity-10 text-success rounded-3 p-2 me-3"><i class="bi bi-check-circle-fill fs-4"></i></div>
-                        <div><p class="mb-0 text-muted small">Tersedia</p><h4 class="mb-0 fw-bold text-success">{{ tersedia_count|default:"0" }}</h4></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card bg-white shadow-sm border-0">
-                    <div class="card-body p-3 d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-primary bg-opacity-10 text-primary rounded-3 p-2 me-3"><i class="bi bi-person-badge-fill fs-4"></i></div>
-                        <div><p class="mb-0 text-muted small">Sedang Dipakai</p><h4 class="mb-0 fw-bold text-primary">{{ dipakai_count|default:"0" }}</h4></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card bg-white shadow-sm border-0">
-                    <div class="card-body p-3 d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-danger bg-opacity-10 text-danger rounded-3 p-2 me-3"><i class="bi bi-tools fs-4"></i></div>
-                        <div><p class="mb-0 text-muted small">Rusak</p><h4 class="mb-0 fw-bold text-danger">{{ rusak_count|default:"0" }}</h4></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="card stat-card bg-white shadow-sm border-0">
-                    <div class="card-body p-3 d-flex align-items-center">
-                        <div class="flex-shrink-0 bg-warning bg-opacity-10 text-warning rounded-3 p-2 me-3"><i class="bi bi-search fs-4"></i></div>
-                        <div><p class="mb-0 text-muted small">Hilang</p><h4 class="mb-0 fw-bold text-warning">{{ hilang_count|default:"0" }}</h4></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
-                        <i class="bi bi-box-seam me-1"></i> Total Aset: {{ total_count|default:assets.count }}
-                    </span>
-                    <div class="d-flex align-items-center px-3 py-2 rounded-pill bg-light border text-secondary text-nowrap">
-                        <i class="bi bi-person-circle me-2"></i>
-                        <span class="fw-medium">Halo, {{ user.username }}!</span>
-                    </div>
-                </div>
-                <div class="d-flex gap-2 w-100 w-md-auto">
-                    <a href="{% url 'export_excel' %}" class="btn btn-success text-white btn-sm fw-medium flex-fill flex-md-grow-0"> 
-                        <i class="bi bi-file-earmark-excel me-1"></i> Export to Excel
-                    </a>
-                    <a href="{% url 'asset_create' %}" class="btn btn-primary btn-sm fw-medium flex-fill flex-md-grow-0">
-                        <i class="bi bi-plus-lg me-1"></i> Tambah Baru
-                    </a>
-                </div>
-            </div>
-
-            <div class="card-body p-4">
-                
-                <div class="card bg-light border-0 mb-4 rounded-4">
-                    <div class="card-body p-3">
-                        <form method="get" 
-                              hx-get="{% url 'asset_list' %}" 
-                              hx-target="#table-container" 
-                              hx-swap="innerHTML" 
-                              hx-push-url="true"
-                              hx-indicator="#table-loading"
-                              hx-trigger="submit, change, keyup delay:500ms"> 
-                            
-                            <input type="hidden" name="per_page" value="{{ per_page }}">
-                            
-                            <div class="row g-2 align-items-center">
-                                <div class="col-md-2">
-                                    <select name="category" class="form-select border-0 shadow-sm">
-                                        <option value="">Semua Kategori</option>
-                                         {% for code, label in kategori_choices %}
-                                            <option value="{{ code }}" {% if category_filter == code %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <select name="location" class="form-select border-0 shadow-sm">
-                                        <option value="">Semua Lokasi</option>
-                                        {% for code, label in lokasi_choices %}
-                                            <option value="{{ code }}" {% if location_filter == code %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                 <div class="col-md-2">
-                                    <select name="status" class="form-select border-0 shadow-sm">
-                                        <option value="">Semua Status</option>
-                                        {% for code, label in status_choices %}
-                                            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-
-                                <div class="col-md">
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
-                                        <input type="text" name="q" class="form-control border-0 shadow-sm" placeholder="Cari nama, SN, user..." value="{{ query|default:'' }}"> 
-                                        <button class="btn btn-primary px-4 fw-medium shadow-sm" type="submit">Cari</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm position-relative" style="min-height: 300px;">
-                    
-                    <div id="table-loading" class="htmx-indicator position-absolute top-50 start-50 translate-middle text-center z-3">
-                        <div class="spinner-border text-primary" role="status"></div>
-                    </div>
-
-                    <div class="card-body p-0" id="table-container">
-                        {% include 'assets/asset_table_partial.html' %}
-                    </div>
-                </div>
-
-            </div>
-        </div> 
-
+        <a href="{% url 'asset_create' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Aset
+        </a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Init Tooltip
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
-    </script>
-</body>
-</html>
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form method="get" action="." class="row g-2" 
+                  hx-get="{% url 'asset_list' %}" 
+                  hx-target="#table-container" 
+                  hx-trigger="change, keyup delay:500ms from:input[name='q']">
+                
+                <div class="col-md-2">
+                    <select name="category" class="form-select border-0 bg-light fw-medium text-secondary" style="cursor: pointer;">
+                        <option value="">Semua Kategori</option>
+                        {% for cat in kategori_list %}
+                            <option value="{{ cat.id }}" {% if category_filter == cat.id %}selected{% endif %}>
+                                {{ cat.nama }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select name="location" class="form-select border-0 bg-light fw-medium text-secondary" style="cursor: pointer;">
+                        <option value="">Semua Lokasi</option>
+                        {% for loc in lokasi_list %}
+                            <option value="{{ loc.id }}" {% if location_filter == loc.id %}selected{% endif %}>
+                                {{ loc.nama }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select name="status" class="form-select border-0 bg-light fw-medium text-secondary" style="cursor: pointer;">
+                        <option value="">Semua Status</option>
+                        {% for code, label in status_choices %}
+                            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md">
+                    <div class="input-group">
+                        <span class="input-group-text border-0 bg-light text-muted ps-3">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="q" value="{{ query|default:'' }}" 
+                               class="form-control border-0 bg-light" 
+                               placeholder="Cari nama, SN, user..." autocomplete="off">
+                        <button class="btn btn-primary px-4" type="submit">Cari</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="table-container" class="card border-0 shadow-sm overflow-hidden">
+        {% include 'assets/asset_table_partial.html' %}
+    </div>
+</div>
+{% endblock %}

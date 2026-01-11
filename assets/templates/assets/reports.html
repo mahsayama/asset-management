@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports & Analytics{% endblock %}
+{% block subtitle %}Visualisasi distribusi aset perusahaan.{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Data Summary</h4>
+        <p class="text-muted small mb-0">Laporan statistik dan ekspor data aset.</p>
+    </div>
+    <a href="{% url 'export_excel' %}" class="btn btn-success text-white fw-medium px-4 rounded-pill shadow-sm">
+        <i class="bi bi-file-earmark-excel me-2"></i> Download Full Report (Excel)
+    </a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card h-100 p-4 border-0 shadow-sm">
+            <h6 class="fw-bold text-dark mb-4"><i class="bi bi-pie-chart me-2 text-primary"></i>Alokasi Berdasarkan Kategori</h6>
+            <div style="height: 350px; position: relative;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100 p-4 border-0 shadow-sm">
+            <h6 class="fw-bold text-dark mb-4"><i class="bi bi-bar-chart me-2 text-primary"></i>Kondisi Aset Berdasarkan Status</h6>
+            <div style="height: 350px; position: relative;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 1. Setup Data Kategori dari Django ke JS
+    const catLabels = [{% for item in category_data %}"{{ item.kategori }}",{% endfor %}];
+    const catTotals = [{% for item in category_data %}{{ item.total }},{% endfor %}];
+
+    // 2. Setup Data Status dari Django ke JS
+    const statLabels = [{% for item in status_data %}"{{ item.status }}",{% endfor %}];
+    const statTotals = [{% for item in status_data %}{{ item.total }},{% endfor %}];
+
+    // Render Donut Chart
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+            labels: catLabels,
+            datasets: [{
+                data: catTotals,
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                hoverOffset: 15,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'bottom',
+                    labels: { padding: 20, usePointStyle: true }
+                }
+            }
+        }
+    });
+
+    // Render Bar Chart
+    new Chart(document.getElementById('statusChart'), {
+        type: 'bar',
+        data: {
+            labels: statLabels,
+            datasets: [{
+                label: 'Jumlah Unit',
+                data: statTotals,
+                backgroundColor: '#4e73df',
+                borderRadius: 10,
+                barThickness: 40
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { drawBorder: false, color: '#f0f0f0' },
+                    ticks: { stepSize: 1 } 
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -2,31 +2,28 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+# 1. MODEL MASTER DATA (Biar bisa ditambah via Dashboard)
+class Kategori(models.Model):
+    nama = models.CharField(max_length=100, unique=True)
+    
+    class Meta:
+        verbose_name_plural = "Kategori"
+
+    def __str__(self):
+        return self.nama
+
+class Lokasi(models.Model):
+    nama = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name_plural = "Lokasi"
+
+    def __str__(self):
+        return self.nama
+
+# 2. MODEL UTAMA
 class Asset(models.Model):
-    # --- Opsi Pilihan Kategori ---
-    KATEGORI_CHOICES = [
-        ('Laptop', 'Laptop'),
-        ('PC', 'PC'),
-        ('Printer', 'Printer'),
-        ('Scanner', 'Scanner'),
-        ('Server', 'Server'),
-        ('Network', 'Network'),
-        ('UPS', 'UPS'),
-        ('Handphone', 'Handphone'),
-        ('Tablet', 'Tablet'),
-        ('Webcam', 'Webcam'),
-        ('Speaker', 'Speaker'),
-    ]
-
-    # --- Opsi Pilihan Lokasi ---
-    LOKASI_CHOICES = [
-        ('Gedung 32', 'Gedung 32'),
-        ('Gedung 34', 'Gedung 34'),
-        ('Gedung 38', 'Gedung 38'),
-        ('Gedung 39', 'Gedung 39'),
-    ]
-
-    # --- Opsi Pilihan Status ---
+    # --- Opsi Pilihan Status (Status mah tetep hardcode aja krn logic system) ---
     STATUS_CHOICES = [
         ('TERSEDIA', 'Tersedia'),
         ('DIPAKAI', 'Sedang Dipakai'),
@@ -39,10 +36,10 @@ class Asset(models.Model):
     barcode_id = models.CharField(max_length=100, verbose_name="ID Barcode", blank=True, null=True)
     serial_number = models.CharField(max_length=100, unique=True, verbose_name="Nomor Seri")
     
-    kategori = models.CharField(max_length=50, choices=KATEGORI_CHOICES)
-    lokasi = models.CharField(max_length=50, choices=LOKASI_CHOICES)
+    # --- PERUBAHAN DISINI: Pake ForeignKey ke Model Baru ---
+    kategori = models.ForeignKey(Kategori, on_delete=models.SET_NULL, null=True, blank=True)
+    lokasi = models.ForeignKey(Lokasi, on_delete=models.SET_NULL, null=True, blank=True)
     
-    # --- PERUBAHAN DISINI (BIAR BISA KOSONG) ---
     purchase_date = models.DateField(verbose_name="Tanggal Beli", null=True, blank=True) 
     price = models.DecimalField(max_digits=15, decimal_places=0, verbose_name="Harga", null=True, blank=True)
     
@@ -50,11 +47,9 @@ class Asset(models.Model):
     note = models.TextField(blank=True, null=True, verbose_name="Keterangan")
 
     # --- FIELD USER & HISTORY ---
-    # Pengguna Saat Ini
     current_user = models.CharField(max_length=100, null=True, blank=True, verbose_name="Pengguna Saat Ini")
     current_dept = models.CharField(max_length=100, null=True, blank=True, verbose_name="Dept/Divisi Saat Ini")
     
-    # Pengguna Sebelumnya
     prev_user = models.CharField(max_length=100, null=True, blank=True, verbose_name="Pengguna Sebelumnya")
     prev_dept = models.CharField(max_length=100, null=True, blank=True, verbose_name="Dept/Divisi Sebelumnya")
 

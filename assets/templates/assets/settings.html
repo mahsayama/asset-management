@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings{% endblock %}
+{% block subtitle %}Konfigurasi sistem dan manajemen master data.{% endblock %}
+
+{% block content %}
+<div class="row g-4 fade-in">
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm p-4 text-center h-100">
+            <div class="mb-3">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                    <i class="bi bi-person-fill fs-1"></i>
+                </div>
+            </div>
+            <h5 class="fw-bold mb-1 text-dark">{{ user.username|title }}</h5>
+            <p class="text-muted small mb-3">Administrator</p>
+            <div class="d-grid gap-2">
+                <a href="{% url 'admin:password_change' %}" class="btn btn-outline-primary btn-sm rounded-pill">
+                    <i class="bi bi-key me-2"></i>Ganti Password
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm p-4 h-100">
+            <h6 class="fw-bold text-dark mb-4 border-bottom pb-2">
+                <i class="bi bi-sliders me-2 text-primary"></i>Preferensi Aplikasi
+            </h6>
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h6 class="mb-0 fw-semibold text-dark">Dark Mode</h6>
+                    <small class="text-muted">Tampilan gelap untuk kenyamanan mata.</small>
+                </div>
+                <div class="form-check form-switch fs-4">
+                    <input class="form-check-input" type="checkbox" id="darkModeToggle" disabled>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-semibold text-dark">Format Mata Uang</h6>
+                    <small class="text-muted">Default: Indonesian Rupiah (IDR)</small>
+                </div>
+                <span class="badge bg-light text-dark border px-3 py-2 font-monospace">Rp 10.000</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h6 class="fw-bold m-0 text-dark">
+                    <i class="bi bi-database-gear me-2 text-primary"></i>Master Data Management
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-5">
+                    
+                    <div class="col-md-6 border-end-md">
+                        <label class="fw-bold text-dark mb-2">📍 Daftar Gedung / Lokasi</label>
+                        <p class="small text-muted mb-3">Tambahkan lokasi baru untuk penempatan aset.</p>
+                        
+                        <form method="POST" class="mb-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="type" value="lokasi">
+                            <div class="input-group">
+                                <input type="text" name="nama" class="form-control" placeholder="Nama Gedung (contoh: Gudang B)" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-plus-lg"></i> Tambah
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for loc in lokasis %}
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-start-pill ps-3 pe-2" disabled>
+                                        {{ loc.nama }}
+                                    </button>
+                                    
+                                    <form action="{% url 'delete_master_data' 'lokasi' loc.id %}" method="POST" class="delete-form" data-name="{{ loc.nama }}" style="margin:0;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-end-pill ps-2 pe-3 border-start-0" title="Hapus">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% empty %}
+                                <span class="text-muted small fst-italic">Belum ada data lokasi.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="fw-bold text-dark mb-2">🏷️ Kategori Aset</label>
+                        <p class="small text-muted mb-3">Tambahkan kategori untuk pengelompokan aset.</p>
+                        
+                        <form method="POST" class="mb-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="type" value="kategori">
+                            <div class="input-group">
+                                <input type="text" name="nama" class="form-control" placeholder="Nama Kategori (contoh: Drone)" required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-plus-lg"></i> Tambah
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for cat in kategoris %}
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-start-pill ps-3 pe-2" disabled>
+                                        {{ cat.nama }}
+                                    </button>
+                                    
+                                    <form action="{% url 'delete_master_data' 'kategori' cat.id %}" method="POST" class="delete-form" data-name="{{ cat.nama }}" style="margin:0;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-end-pill ps-2 pe-3 border-start-0" title="Hapus">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            {% empty %}
+                                <span class="text-muted small fst-italic">Belum ada data kategori.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Logic Popup Konfirmasi Modern
+    const deleteForms = document.querySelectorAll('.delete-form');
+
+    deleteForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Stop dulu, jangan langsung kirim
+            
+            const itemName = this.getAttribute('data-name'); // Ambil nama item
+            
+            Swal.fire({
+                title: 'Hapus ' + itemName + '?',
+                text: "Data aset yang menggunakan ini akan menjadi kosong.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545', // Warna merah bootstrap
+                cancelButtonColor: '#6c757d',  // Warna abu bootstrap
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                focusCancel: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Kalau user klik Ya, baru submit form beneran
+                    this.submit();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

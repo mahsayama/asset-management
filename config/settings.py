@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-0uv&ax19ru9#&qq07z1*o1rm9b+dd%79()r%a7r91nv_5k+rmz'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize', # <--- Tambahin ini
 
     # App buatan kita
     'assets',
@@ -118,14 +119,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-# --- SETTING LOGIN ---
-# Kalau user belum login, lempar ke sini:
-LOGIN_URL = 'login' 
-# TAMBAHIN INI BIAR DJANGO TAU LOKASI FOLDER LO
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+STATIC_URL = '/static/'
+# Ini folder tempat ngumpulin file CSS/JS pas di server nanti
+STATIC_ROOT = BASE_DIR / 'staticfiles' 
+# Ini folder static lu pas lagi ngoding di laptop
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Kalau BERHASIL login, lempar ke sini:
 LOGIN_REDIRECT_URL = 'asset_list'
