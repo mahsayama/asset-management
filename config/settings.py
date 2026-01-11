@@ -125,8 +125,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Ini folder static lu pas lagi ngoding di laptop
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Kalau BERHASIL login, lempar ke sini:
-LOGIN_REDIRECT_URL = 'asset_list'
-
-# Kalau logout, lempar ke sini:
+# Redirect Login (Biar gak nyasar ke /accounts/login/)
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
