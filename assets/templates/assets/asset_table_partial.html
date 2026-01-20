@@ -1,6 +1,6 @@
 {% load humanize %}
 
-<div class="table-responsive fade-in">
+<div class="table-responsive">
     <table class="table table-hover align-middle text-start mb-0">
         <thead class="bg-light">
             <tr>
@@ -12,7 +12,7 @@
                 <th class="d-none d-xl-table-cell">History</th> 
                 <th>Status</th>
                 <th class="d-none d-lg-table-cell">Harga</th>
-                <th class="text-center" style="min-width: 140px;">Aksi</th> 
+                <th class="text-center" style="min-width: 120px;">Aksi</th> 
             </tr>
         </thead>
         <tbody>
@@ -52,23 +52,63 @@
                 <td class="d-none d-lg-table-cell font-monospace fw-medium text-dark">
                     Rp {{ asset.price|intcomma|default:"0" }}
                 </td>
+                
                 <td class="text-center">
-                    <div class="btn-group shadow-sm rounded-3 overflow-hidden">
-                        <a href="{% url 'asset_detail' asset.pk %}" class="btn btn-sm btn-info text-white px-2" title="Detail" data-bs-toggle="tooltip">
-                            <i class="bi bi-eye-fill"></i>
-                        </a>
-                        <a href="{% url 'asset_update' asset.pk %}" class="btn btn-sm btn-warning text-white px-2" title="Edit" data-bs-toggle="tooltip">
-                            <i class="bi bi-pencil-fill"></i>
-                        </a>
-                        <a href="{% url 'asset_delete' asset.pk %}" class="btn btn-sm btn-danger px-2" title="Hapus" data-bs-toggle="tooltip">
-                            <i class="bi bi-trash-fill"></i>
-                        </a>
+                    <a href="{% url 'asset_detail' asset.pk %}" class="text-primary text-decoration-none mx-1" title="Detail" data-bs-toggle="tooltip">
+                        <i class="bi bi-eye fs-5"></i>
+                    </a>
+                    <a href="{% url 'asset_update' asset.pk %}" class="text-warning text-decoration-none mx-1" title="Edit" data-bs-toggle="tooltip">
+                        <i class="bi bi-pencil-square fs-5"></i>
+                    </a>
+                    <a href="{% url 'asset_delete' asset.pk %}" class="text-danger text-decoration-none mx-1" title="Hapus" data-bs-toggle="tooltip">
+                        <i class="bi bi-trash fs-5"></i>
+                    </a>
+                </td>
+                </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center py-5">
+                    <div class="mb-3 text-muted opacity-25">
+                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
                     </div>
+                    <h6 class="fw-bold text-dark">Data Tidak Ditemukan</h6>
+                    <p class="small text-muted mb-0">
+                        {% if query %}
+                            Tidak ada aset dengan kata kunci "<strong>{{ query }}</strong>".
+                        {% else %}
+                            Belum ada data aset di database.
+                        {% endif %}
+                    </p>
                 </td>
             </tr>
-            {% empty %}
-            <tr><td colspan="9" class="text-center py-5">Belum ada data.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+{% if assets.has_other_pages %}
+<div class="d-flex justify-content-between align-items-center p-3 border-top bg-white">
+    <small class="text-muted">
+        Halaman {{ assets.number }} dari {{ assets.paginator.num_pages }}
+    </small>
+    <div class="btn-group">
+        {% if assets.has_previous %}
+        <button class="btn btn-sm btn-outline-secondary" 
+                hx-get="?page={{ assets.previous_page_number }}&q={{ query|default:'' }}&category={{ category_filter }}&location={{ location_filter }}&status={{ status_filter }}"
+                hx-target="#table-container" 
+                hx-swap="innerHTML">
+            <i class="bi bi-chevron-left"></i> Prev
+        </button>
+        {% endif %}
+        
+        {% if assets.has_next %}
+        <button class="btn btn-sm btn-outline-secondary" 
+                hx-get="?page={{ assets.next_page_number }}&q={{ query|default:'' }}&category={{ category_filter }}&location={{ location_filter }}&status={{ status_filter }}"
+                hx-target="#table-container" 
+                hx-swap="innerHTML">
+            Next <i class="bi bi-chevron-right"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

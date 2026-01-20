@@ -1,4 +1,5 @@
-import openpyxl 
+import csv  # <--- WAJIB ADA (Buat fitur Export CSV)
+import openpyxl # (Opsional, kalau gak dipake hapus aja biar bersih)
 from django.http import HttpResponse 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Q, Sum 
@@ -170,42 +171,33 @@ def asset_delete(request, pk):
 # --- 6. DASHBOARD ---
 @login_required
 def dashboard(request):
-    total_assets = Asset.objects.count()
-    total_value = Asset.objects.aggregate(Sum('price'))['price__sum'] or 0
-    
+    # 1. Hitung Total Aset
+    total_asset = Asset.objects.count()
+
+    # 2. Data Grafik (Status & Kategori) - INI KODINGAN LAMA (TETAP DIPAKE)
+    status_data = Asset.objects.values('status').annotate(total=Count('status'))
+    status_labels = [item['status'] for item in status_data]
+    status_counts = [item['total'] for item in status_data]
+
+    category_data = Asset.objects.values('kategori__nama').annotate(total=Count('id')).order_by('-total')
+    cat_labels = [item['kategori__nama'] if item['kategori__nama'] else 'Tanpa Kategori' for item in category_data]
+    cat_counts = [item['total'] for item in category_data]
+
+    # --- 3. TAMBAHAN BARU: AMBIL 5 ASET TERBARU ---
+    # order_by('-created_at') artinya urutkan dari yang paling baru
+    # [:5] artinya cuma ambil 5 biji
+    recent_assets = Asset.objects.select_related('kategori', 'lokasi').order_by('-created_at')[:5]
+
     context = {
-        'total_assets': total_assets,
-        'total_value': total_value,
-        'recent_assets': Asset.objects.all().order_by('-created_at')[:5],
-        'tersedia_count': Asset.objects.filter(status='TERSEDIA').count(),
-        'dipakai_count': Asset.objects.filter(status='DIPAKAI').count(),
-        'rusak_count': Asset.objects.filter(status='RUSAK').count(),
+        'total_asset': total_asset,
+        'status_labels': status_labels,
+        'status_counts': status_counts,
+        'cat_labels': cat_labels,
+        'cat_counts': cat_counts,
+        'recent_assets': recent_assets, # <-- Jangan lupa masukin ke context
     }
-    return render(request, 'assets/dashboard.html', context)
 
-
-# --- 7. REPORTS (FIXED LOGIC) ---
-@login_required
-def reports_view(request):
-    # FIX: Pake __nama untuk ambil nama kategori, bukan ID-nya
-    # values('kategori__nama') artinya group by kolom nama di tabel Kategori
-    category_data = Asset.objects.values('kategori__nama').annotate(total=Count('id'))
-    
-    # Status data tetep sama
-    status_data = Asset.objects.values('status').annotate(total=Count('id'))
-    
-    # Kita perlu mapping biar template reports.html ga bingung
-    # Ubah format biar sesuai template: [{'kategori': 'Laptop', 'total': 5}, ...]
-    cleaned_category_data = []
-    for item in category_data:
-        nama = item['kategori__nama'] if item['kategori__nama'] else 'Uncategorized'
-        cleaned_category_data.append({'kategori': nama, 'total': item['total']})
-
-    return render(request, 'assets/reports.html', {
-        'category_data': cleaned_category_data,
-        'status_data': status_data,
-    })
-
+    return render(request, 'dashboard.html', context)
 
 # --- 8. SETTINGS ---
 @login_required
@@ -249,39 +241,58 @@ def delete_master_data(request, tipe, pk):
 
 # --- 9. EXPORT EXCEL ---
 @login_required
-def export_excel(request):
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="Laporan_Aset.xlsx"'
+def export_assets_csv(request):
+    # 1. Setup Response Browser (Biar browser tau ini file download)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="data_aset_it.csv"'
 
-    workbook = openpyxl.Workbook()
-    worksheet = workbook.active
-    worksheet.title = 'Data Aset'
+    # 2. Bikin CSV Writer
+    writer = csv.writer(response)
+    
+    # 3. Tulis Header (Judul Kolom)
+    writer.writerow(['Nama Aset', 'Serial Number', 'Barcode', 'Kategori', 'Lokasi', 'Pengguna', 'Status', 'Harga', 'Tanggal Beli'])
 
-    headers = ['Nama Aset', 'Barcode ID', 'Serial Number', 'Kategori', 'Lokasi', 'Status', 'Tanggal Beli', 'Harga', 'User', 'Keterangan']
-    worksheet.append(headers)
-
-    for cell in worksheet[1]:
-        cell.font = openpyxl.styles.Font(bold=True)
-
+    # 4. Ambil Data dari Database
     assets = Asset.objects.all().order_by('-created_at')
 
+    # 5. Loop dan Tulis Baris Data
     for asset in assets:
-        # Handle ForeignKey biar yang muncul Namanya, bukan ID
-        kategori_nama = asset.kategori.nama if asset.kategori else "-"
-        lokasi_nama = asset.lokasi.nama if asset.lokasi else "-"
-
-        worksheet.append([
+        writer.writerow([
             asset.name,
-            asset.barcode_id,
             asset.serial_number,
-            kategori_nama, # Fix export
-            lokasi_nama,   # Fix export
-            asset.get_status_display(),
-            asset.purchase_date,
+            asset.barcode_id,
+            asset.kategori.nama if asset.kategori else '-',
+            asset.lokasi.nama if asset.lokasi else '-',
+            asset.current_user if asset.current_user else '-',
+            asset.get_status_display(), # Ambil teks status (Tersedia/Rusak), bukan kodenya
             asset.price,
-            asset.current_user,
-            asset.note
+            asset.purchase_date,
         ])
 
-    workbook.save(response)
     return response
+
+@login_required
+def reports_view(request):
+    # 1. Total Valuasi Aset (Jumlahin semua field price)
+    # Hasilnya: {'price__sum': 50000000}
+    total_value_data = Asset.objects.aggregate(Sum('price'))
+    total_value = total_value_data['price__sum'] or 0 # Kalau kosong kasih 0
+
+    # 2. Laporan per Kategori (Nama, Jumlah Unit, Total Harga per Kategori)
+    category_report = Asset.objects.values('kategori__nama').annotate(
+        total_unit=Count('id'),
+        total_price=Sum('price')
+    ).order_by('-total_price') # Urutkan dari yang paling mahal totalnya
+
+    # 3. Laporan per Lokasi (Nama, Jumlah Unit)
+    location_report = Asset.objects.values('lokasi__nama').annotate(
+        total_unit=Count('id')
+    ).order_by('-total_unit')
+
+    context = {
+        'total_value': total_value,
+        'category_report': category_report,
+        'location_report': location_report,
+    }
+
+    return render(request, 'reports.html', context)

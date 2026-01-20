@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block subtitle %}Ringkasan kondisi aset perusahaan.{% endblock %}
+
+{% block content %}
+
+<div class="row g-3">
+    
+    <div class="col-lg-4 d-flex flex-column gap-3">
+        
+        <div class="card border-0 shadow-sm border-start border-4 border-primary">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Total Aset</div>
+                        <div class="h4 mb-0 fw-bold text-gray-800">{{ total_asset }} Unit</div>
+                    </div>
+                    <i class="bi bi-box-seam fs-1 text-gray-300 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm flex-fill">
+            <div class="card-header bg-white py-2 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 fw-bold text-primary small">Komposisi Status</h6>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div style="height: 220px; width: 100%;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-lg-8 d-flex flex-column gap-3">
+        
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-2">
+                <h6 class="m-0 fw-bold text-primary small">Aset per Kategori</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 180px; width: 100%;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm flex-fill">
+            <div class="card-header bg-white py-2 d-flex align-items-center justify-content-between">
+                <h6 class="m-0 fw-bold text-primary small">
+                    <i class="bi bi-clock-history me-1"></i> Baru Ditambahkan
+                </h6>
+                <a href="{% url 'asset_list' %}" class="btn btn-sm btn-light text-primary fw-medium rounded-pill px-3" style="font-size: 0.75rem;">
+                    Lihat Semua <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-nowrap" style="font-size: 0.85rem;">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 py-2">Nama Aset</th>
+                                <th class="py-2">Kategori</th>
+                                <th class="py-2">Lokasi</th>
+                                <th class="py-2">Status</th>
+                                <th class="py-2 text-end pe-3">Tanggal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asset in recent_assets %}
+                            <tr>
+                                <td class="ps-3 py-2">
+                                    <div class="fw-bold text-dark">{{ asset.name|truncatechars:20 }}</div>
+                                    <small class="text-muted font-monospace">{{ asset.serial_number }}</small>
+                                </td>
+                                <td class="py-2">
+                                    <span class="badge bg-light text-secondary border fw-normal">{{ asset.kategori.nama|default:"-" }}</span>
+                                </td>
+                                <td class="py-2 text-muted">{{ asset.lokasi.nama|default:"-" }}</td>
+                                <td class="py-2">
+                                    {% if asset.status == 'TERSEDIA' %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2">Tersedia</span>
+                                    {% elif asset.status == 'DIPAKAI' %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2">Dipakai</span>
+                                    {% elif asset.status == 'RUSAK' %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2">Rusak</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2">{{ asset.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-3 py-2 text-muted">
+                                    {{ asset.created_at|date:"d M Y" }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-3 text-muted">Belum ada data.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function initDashboardCharts() {
+        // --- CONFIG CHART ---
+        // Biar tulisan di chart gak kegedean, kita kecilin font-nya dikit
+        Chart.defaults.font.size = 11;
+        
+        // 1. CHART STATUS
+        var ctxStatus = document.getElementById("statusChart");
+        if (ctxStatus) {
+            new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ status_labels|safe }},
+                    datasets: [{
+                        data: {{ status_counts|safe }},
+                        backgroundColor: ['#1cc88a', '#4e73df', '#e74a3b', '#36b9cc', '#f6c23e'],
+                        hoverBorderColor: "white",
+                        borderWidth: 2
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false, // PENTING: Biar ngikutin tinggi container div
+                    cutout: '75%',
+                    plugins: { 
+                        legend: { position: 'right', labels: { boxWidth: 12 } } 
+                    }
+                },
+            });
+        }
+
+        // 2. CHART KATEGORI
+        var ctxCat = document.getElementById("categoryChart");
+        if (ctxCat) {
+            new Chart(ctxCat, {
+                type: 'bar',
+                data: {
+                    labels: {{ cat_labels|safe }},
+                    datasets: [{
+                        label: "Unit",
+                        backgroundColor: "#4e73df",
+                        hoverBackgroundColor: "#2e59d9",
+                        data: {{ cat_counts|safe }},
+                        borderRadius: 3,
+                        barThickness: 30, // Biar bar-nya gak kegemukan
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false, // PENTING
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [2] }, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    }
+
+    document.addEventListener("turbo:load", initDashboardCharts);
+    if (document.readyState === 'complete') initDashboardCharts();
+    else document.addEventListener('DOMContentLoaded', initDashboardCharts);
+</script>
+{% endblock %}
