@@ -1,0 +1,35 @@
+# Ini adalah instruksi buat Robot GitLab
+
+# Kita butuh 'Docker' di dalam 'Docker' buat nge-build image (inception style)
+image: docker:24.0.5
+services:
+  - docker:24.0.5-dind
+
+variables:
+  # Ini settingan biar performa docker kenceng
+  DOCKER_DRIVER: overlay2
+  # Ini nama tag image kita nanti. 
+  # $CI_REGISTRY_IMAGE = alamat lemari penyimpanan project lu
+  # $CI_COMMIT_REF_SLUG = nama branch (misal: main)
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+# Daftar tahapan kerja si robot
+stages:
+  - build
+
+# Tugas 1: Bikin Image
+build_image:
+  stage: build
+  script:
+    # 1. Login dulu ke 'lemari' GitLab Registry pake user & password otomatis
+    - echo "Login ke GitLab Registry..."
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    
+    # 2. Perintah build image (sama kayak yg lu ketik di laptop, tapi ini robot yg ngetik)
+    - echo "Sedang memasak (Build) Docker Image..."
+    - docker build -t $IMAGE_TAG .
+    
+    # 3. Upload hasil masakannya ke lemari GitLab
+    - echo "Upload (Push) Image ke Registry..."
+    - docker push $IMAGE_TAG
+    - echo "Selesai! Image sudah aman tersimpan."
