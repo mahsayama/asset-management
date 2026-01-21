@@ -1,3 +1,25 @@
+image: docker:24.0.5
+services:
+  - docker:24.0.5-dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:main
+
+stages:
+  - build
+  - deploy
+
+build_image:
+  stage: build
+  script:
+    - echo "Login ke GitLab Registry..."
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "Build Docker Image..."
+    - docker build -t $IMAGE_TAG .
+    - echo "Push Image ke Registry..."
+    - docker push $IMAGE_TAG
+
 deploy_production:
   stage: deploy
   image: alpine:latest
@@ -22,13 +44,10 @@ deploy_production:
         docker pull $IMAGE_TAG;
         
         echo '4. Jalanin Container Baru (Dengan Volume)...';
-        # -v artinya: Pake file db_production.sqlite3 di server GCP sebagai database container
         docker run -d -p 80:8000 -v /home/$SSH_USER/db_production.sqlite3:/app/db.sqlite3 --name web-simulasi $IMAGE_TAG;
 
         echo '5. Setup Database Otomatis...';
-        # Jalanin migrate biar tabelnya dibuat
         docker exec web-simulasi python manage.py migrate;
-        # Kumpulin file static (CSS/JS) biar tampilan rapi
         docker exec web-simulasi python manage.py collectstatic --noinput;
       "
     - echo "Deploy Selesai! Web sudah terupdate dan Database aman."
