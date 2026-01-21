@@ -1,5 +1,5 @@
 # 1. Gunakan base image Python yang ringan
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 # 2. Set environment variables agar Python output-nya langsung ke terminal (bagus buat log)
 ENV PYTHONDONTWRITEBYTECODE=1
