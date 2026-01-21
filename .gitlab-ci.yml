@@ -1,35 +1,53 @@
-# Ini adalah instruksi buat Robot GitLab
-
-# Kita butuh 'Docker' di dalam 'Docker' buat nge-build image (inception style)
 image: docker:24.0.5
 services:
   - docker:24.0.5-dind
 
 variables:
-  # Ini settingan biar performa docker kenceng
   DOCKER_DRIVER: overlay2
-  # Ini nama tag image kita nanti. 
-  # $CI_REGISTRY_IMAGE = alamat lemari penyimpanan project lu
-  # $CI_COMMIT_REF_SLUG = nama branch (misal: main)
-  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:main
 
-# Daftar tahapan kerja si robot
 stages:
   - build
+  - deploy
 
-# Tugas 1: Bikin Image
 build_image:
   stage: build
   script:
-    # 1. Login dulu ke 'lemari' GitLab Registry pake user & password otomatis
     - echo "Login ke GitLab Registry..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    
-    # 2. Perintah build image (sama kayak yg lu ketik di laptop, tapi ini robot yg ngetik)
-    - echo "Sedang memasak (Build) Docker Image..."
+    - echo "Build Docker Image..."
     - docker build -t $IMAGE_TAG .
-    
-    # 3. Upload hasil masakannya ke lemari GitLab
-    - echo "Upload (Push) Image ke Registry..."
+    - echo "Push Image ke Registry..."
     - docker push $IMAGE_TAG
-    - echo "Selesai! Image sudah aman tersimpan."
+
+deploy_production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    # Persiapan alat tempur SSH
+    - apk update && apk add openssh-client
+    - eval $(ssh-agent -s)
+    # Masukin kunci rahasia ke agen SSH
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    # Biar gak ditanya "Are you sure?" pas connect pertama kali
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  script:
+    - echo "Mulai Deploy ke Server GCP..."
+    # Login ke server GCP lewat pintu belakang (SSH) dan jalanin perintah update
+    - ssh $SSH_USER@$SSH_IP "
+        echo '1. Login ke Registry...';
+        docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD;
+        
+        echo '2. Stop & Hapus Container Lama...';
+        docker stop web-simulasi || true;
+        docker rm web-simulasi || true;
+        
+        echo '3. Tarik Image Terbaru...';
+        docker pull $IMAGE_TAG;
+        
+        echo '4. Jalanin Container Baru...';
+        docker run -d -p 80:8000 --name web-simulasi $IMAGE_TAG;
+      "
+    - echo "Deploy Selesai! Web sudah terupdate."
