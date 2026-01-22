@@ -4,7 +4,6 @@ services:
 
 variables:
   DOCKER_DRIVER: overlay2
-  # Kita namain image-nya pake commit SHA biar unik tiap versi
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
   LATEST_TAG: $CI_REGISTRY_IMAGE:main
 
@@ -20,7 +19,6 @@ build_image:
     - echo "Login ke GitLab Registry..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - echo "Build Docker Image..."
-    # Kita build dan kasih 2 label (SHA unik & main)
     - docker build -t $IMAGE_TAG -t $LATEST_TAG .
     - echo "Push Image ke Registry..."
     - docker push $IMAGE_TAG
@@ -34,13 +32,15 @@ test_application:
     - echo "Setup Environment untuk Testing..."
     - pip install -r requirements.txt
     - echo "Jalanin Django Unit Test..."
-    # Ini bakal nyari file tests.py di project lu dan jalanin test-nya
     - python manage.py test
 
 # --- STAGE 3: DEPLOY STAGING (OTOMATIS) ---
 deploy_staging:
   stage: deploy
   image: alpine:latest
+  environment:
+    name: staging
+    url: http://$SSH_IP:8080
   before_script:
     - apk update && apk add openssh-client
     - eval $(ssh-agent -s)
@@ -50,31 +50,28 @@ deploy_staging:
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
     - echo "Deploy ke STAGING Server (Port 8080)..."
-    - ssh $SSH_USER@$SSH_IP "
+    # Menggunakan blok text (|) biar aman dari error kutip/spasi
+    - |
+      ssh $SSH_USER@$SSH_IP "
         docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD;
-        
-        # Stop Container Staging Lama
+        echo 'Restarting Staging Container...';
         docker stop web-staging || true;
         docker rm web-staging || true;
-        
         docker pull $IMAGE_TAG;
-        
-        # Jalanin Staging di Port 8080 & Pake DB Staging Terpisah
         docker run -d -p 8080:8000 -v /home/$SSH_USER/db_staging.sqlite3:/app/db.sqlite3 --name web-staging $IMAGE_TAG;
-        
         docker exec web-staging python manage.py migrate;
         docker exec web-staging python manage.py collectstatic --noinput;
       "
-  environment:
-    name: staging
-    url: http://$SSH_IP:8080
 
 # --- STAGE 4: DEPLOY PRODUCTION (MANUAL) ---
 deploy_production:
   stage: deploy
   image: alpine:latest
-  # Job ini GAK JALAN otomatis. Nunggu lu klik tombol 'Play' di GitLab.
-  when: manual 
+  when: manual
+  allow_failure: false
+  environment:
+    name: production
+    url: http://$SSH_IP
   before_script:
     - apk update && apk add openssh-client
     - eval $(ssh-agent -s)
@@ -84,25 +81,16 @@ deploy_production:
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
     - echo "Deploy ke PRODUCTION Server (Port 80)..."
-    - ssh $SSH_USER@$SSH_IP "
+    - |
+      ssh $SSH_USER@$SSH_IP "
         docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD;
-        
-        # Stop Container Production Lama (web-simulasi kita ganti jadi web-production biar rapi)
+        echo 'Restarting Production Container...';
         docker stop web-production || true;
         docker rm web-production || true;
-        
-        # Cleanup container lama (web-simulasi) kalau masih ada
         docker stop web-simulasi || true;
         docker rm web-simulasi || true;
-        
         docker pull $IMAGE_TAG;
-        
-        # Jalanin Prod di Port 80 & Pake DB Production Asli
         docker run -d -p 80:8000 -v /home/$SSH_USER/db_production.sqlite3:/app/db.sqlite3 --name web-production $IMAGE_TAG;
-        
         docker exec web-production python manage.py migrate;
         docker exec web-production python manage.py collectstatic --noinput;
       "
-  environment:
-    name: production
-    url: http://$SSH_IP
