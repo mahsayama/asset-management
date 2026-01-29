@@ -52,7 +52,6 @@
                 <td class="d-none d-lg-table-cell font-monospace fw-medium text-dark">
                     Rp {{ asset.price|intcomma|default:"0" }}
                 </td>
-                
                 <td class="text-center">
                     <a href="{% url 'asset_detail' asset.pk %}" class="text-primary text-decoration-none mx-1" title="Detail" data-bs-toggle="tooltip">
                         <i class="bi bi-eye fs-5"></i>
@@ -64,7 +63,7 @@
                         <i class="bi bi-trash fs-5"></i>
                     </a>
                 </td>
-                </tr>
+            </tr>
             {% empty %}
             <tr>
                 <td colspan="9" class="text-center py-5">
@@ -72,13 +71,7 @@
                         <i class="bi bi-inbox" style="font-size: 3rem;"></i>
                     </div>
                     <h6 class="fw-bold text-dark">Data Tidak Ditemukan</h6>
-                    <p class="small text-muted mb-0">
-                        {% if query %}
-                            Tidak ada aset dengan kata kunci "<strong>{{ query }}</strong>".
-                        {% else %}
-                            Belum ada data aset di database.
-                        {% endif %}
-                    </p>
+                    <p class="small text-muted mb-0">Hasil filter tidak memiliki data aset.</p>
                 </td>
             </tr>
             {% endfor %}
@@ -94,8 +87,10 @@
     <div class="btn-group">
         {% if assets.has_previous %}
         <button class="btn btn-sm btn-outline-secondary" 
-                hx-get="?page={{ assets.previous_page_number }}&q={{ query|default:'' }}&category={{ category_filter }}&location={{ location_filter }}&status={{ status_filter }}"
-                hx-target="#table-container" 
+                hx-get="?page={{ assets.previous_page_number }}&q={{ query|default:'' }}&category={{ category_filter|default:'' }}&location={{ location_filter|default:'' }}&status={{ status_filter|default:'' }}"
+                hx-target="#asset-table-body" 
+                hx-push-url="true"
+                hx-indicator=".htmx-indicator"
                 hx-swap="innerHTML">
             <i class="bi bi-chevron-left"></i> Prev
         </button>
@@ -103,8 +98,10 @@
         
         {% if assets.has_next %}
         <button class="btn btn-sm btn-outline-secondary" 
-                hx-get="?page={{ assets.next_page_number }}&q={{ query|default:'' }}&category={{ category_filter }}&location={{ location_filter }}&status={{ status_filter }}"
-                hx-target="#table-container" 
+                hx-get="?page={{ assets.next_page_number }}&q={{ query|default:'' }}&category={{ category_filter|default:'' }}&location={{ location_filter|default:'' }}&status={{ status_filter|default:'' }}"
+                hx-target="#asset-table-body" 
+                hx-push-url="true"
+                hx-indicator=".htmx-indicator"
                 hx-swap="innerHTML">
             Next <i class="bi bi-chevron-right"></i>
         </button>
@@ -112,3 +109,11 @@
     </div>
 </div>
 {% endif %}
+
+<script>
+    // Pastikan tooltip jalan lagi abis ganti konten
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>

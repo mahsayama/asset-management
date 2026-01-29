@@ -10,16 +10,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 
-    <script type="module">
-        import hotwiredTurbo from 'https://cdn.skypack.dev/@hotwired/turbo';
-    </script>
-    
     <script>
-        // Kita cek localStorage langsung biar sidebar gak 'lompat' ukurannya pas refresh
+        // Cek localStorage biar sidebar gak lompat pas refresh hard reload
         if (localStorage.getItem('sidebar-collapsed') === 'true') {
             document.documentElement.classList.add('collapsed');
         }
@@ -49,30 +44,39 @@
             transition: margin-left var(--transition-speed) ease;
         }
 
-        /* ANIMASI FADE-IN HALUS SETIAP GANTI HALAMAN */
+        /* Loading Bar HTMX (Pengganti Turbo Progress Bar) */
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 200ms ease-in;
+            position: fixed; top: 0; left: 0; width: 100%; height: 3px; 
+            background: var(--primary-color); z-index: 9999;
+        }
+        .htmx-request .htmx-indicator {
+            opacity: 1; /* Muncul pas lagi loading */
+        }
+        .htmx-request.htmx-indicator {
+            opacity: 1;
+        }
+
+        /* ANIMASI FADE-IN */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Class ini otomatis ditempel Turbo saat render halaman baru */
-        .turbo-progress-bar {
-            background-color: var(--primary-color);
-            height: 3px;
         }
 
         /* LOGIKA COLLAPSED */
         html.collapsed .sidebar { width: var(--sidebar-collapsed-width); }
         html.collapsed .main-content { margin-left: var(--sidebar-collapsed-width); }
         
-        /* Sembunyikan elemen saat collapsed */
         html.collapsed .sidebar .nav-link span,
         html.collapsed .sidebar .sidebar-text,
         html.collapsed .sidebar .btn-text { 
             opacity: 0; pointer-events: none; display: none; 
         }
 
-        /* Center icons */
         html.collapsed .sidebar .nav-link,
         html.collapsed .sidebar .sidebar-brand,
         html.collapsed .sidebar .mt-auto { 
@@ -80,7 +84,6 @@
         }
         html.collapsed .sidebar .sidebar-brand i { margin-right: 0 !important; }
 
-        /* Icon Swap Logic */
         .icon-collapsed { display: none; }
         .icon-expanded { display: inline-block; }
         html.collapsed .icon-expanded { display: none; }
@@ -102,9 +105,12 @@
         .table thead th { background-color: #f8f9fa; color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 600; }
     </style>
 </head>
-<body>
 
-    <div id="permanent-sidebar" class="sidebar d-flex flex-column" data-turbo-permanent>
+<body hx-boost="true">
+
+    <div class="htmx-indicator"></div>
+
+    <div id="permanent-sidebar" class="sidebar d-flex flex-column" hx-preserve>
         <div class="p-4 border-bottom d-flex align-items-center sidebar-brand" style="height: 80px;">
              <div class="fw-bold text-primary m-0 d-flex align-items-center" style="letter-spacing: -0.5px; line-height: 1.2;">
                 <i class="bi bi-box-seam-fill me-2 fs-4"></i>
@@ -131,7 +137,7 @@
         </nav>
 
         <div class="mt-auto p-4 border-top">
-             <form action="{% url 'logout' %}" method="post" data-turbo="false">
+             <form action="{% url 'logout' %}" method="post" hx-boost="false">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-danger w-100 btn-sm fw-medium d-flex align-items-center justify-content-center">
                     <i class="bi bi-box-arrow-right"></i> 
@@ -166,7 +172,7 @@
             </div>
         </div>
 
-        <div style="animation: fadeIn 0.4s ease-out;">
+        <div class="fade-in">
             {% block content %}
             {% endblock %}
         </div>
@@ -175,17 +181,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // FUNGSI INI JALAN SETIAP KALI TURBO LOAD HALAMAN BARU
-        document.addEventListener('turbo:load', function() {
-            
-            // 1. Re-Initialize Sidebar Toggle (Karena HTML body berubah)
+        // Fungsi Init Sidebar Toggle
+        function initSidebarLogic() {
             const sidebarToggle = document.getElementById('sidebarToggle');
             const html = document.documentElement;
 
             if (sidebarToggle) {
-                // Hapus listener lama biar gak double (optional tapi good practice)
+                // Clone biar gak double listener pas htmx swap
                 const newToggle = sidebarToggle.cloneNode(true);
-                sidebarToggle.parentNode.replaceChild(newToggle, sidebarToggle);
+                if(sidebarToggle.parentNode) {
+                    sidebarToggle.parentNode.replaceChild(newToggle, sidebarToggle);
+                }
                 
                 newToggle.addEventListener('click', function() {
                     html.classList.toggle('collapsed');
@@ -193,7 +199,7 @@
                 });
             }
 
-            // 2. Active Menu Logic (Biar menu biru pindah)
+            // Logic Menu Aktif (Biru)
             const currentPath = window.location.pathname;
             document.querySelectorAll('#sidebar-nav-links .nav-link').forEach(link => {
                 link.classList.remove('active');
@@ -201,23 +207,16 @@
                     link.classList.add('active');
                 }
             });
+        }
 
-            // 3. Re-init HTMX (Jaga-jaga kalau ada konten HTMX baru masuk)
-            if (typeof htmx !== 'undefined') {
-                htmx.process(document.body);
-            }
-        });
+        // 1. Jalan pas pertama kali load
+        document.addEventListener('DOMContentLoaded', initSidebarLogic);
 
-        // Event listener buat toggle sidebar di load pertama kali banget
-        document.addEventListener('DOMContentLoaded', function() {
-             const sidebarToggle = document.getElementById('sidebarToggle');
-             if(sidebarToggle) {
-                sidebarToggle.addEventListener('click', function() {
-                    document.documentElement.classList.toggle('collapsed');
-                    localStorage.setItem('sidebar-collapsed', document.documentElement.classList.contains('collapsed'));
-                });
-             }
-        });
+        // 2. Jalan setiap kali HTMX selesai ganti halaman (SPA Mode)
+        document.addEventListener('htmx:afterSwap', initSidebarLogic);
+        
+        // 3. Update menu aktif kalau user klik back/forward browser
+        document.addEventListener('htmx:historyRestore', initSidebarLogic);
     </script>
 
     {% block scripts %}{% endblock %}

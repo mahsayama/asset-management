@@ -1,34 +1,40 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %}Inventory Aset{% endblock %}
 {% block subtitle %}Kelola database seluruh aset IT.{% endblock %}
 
 {% block content %}
-
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex gap-2">
         <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
             <i class="bi bi-box-seam me-1"></i> Total Data: {{ assets.paginator.count }} Unit
         </span>
     </div>
-    <a href="{% url 'asset_create' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
-        <i class="bi bi-plus-lg me-1"></i> Tambah Aset
-    </a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'asset_create' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Tambah Aset
+        </a>
+    </div>
 </div>
 
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body p-3">
         <form method="get" action="." class="row g-2" 
               hx-get="{% url 'asset_list' %}" 
-              hx-target="#table-container" 
+              hx-target="#asset-table-body" 
               hx-swap="innerHTML" 
+              hx-push-url="true"
+              hx-indicator=".htmx-indicator"
               hx-trigger="change, submit, keyup delay:500ms from:input[name='q']">
             
+            <input type="hidden" name="page" value="1">
+            
             <div class="col-md-2">
-                <select name="category" class="form-select border-0 bg-light fw-medium text-secondary" style="cursor: pointer;">
+                <select name="category" class="form-select border-0 bg-light fw-medium text-secondary">
                     <option value="">Semua Kategori</option>
                     {% for cat in kategori_list %}
-                        <option value="{{ cat.id }}" {% if category_filter == cat.id %}selected{% endif %}>
+                        <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>
                             {{ cat.nama }}
                         </option>
                     {% endfor %}
@@ -36,10 +42,10 @@
             </div>
 
             <div class="col-md-2">
-                <select name="location" class="form-select border-0 bg-light fw-medium text-secondary" style="cursor: pointer;">
+                <select name="location" class="form-select border-0 bg-light fw-medium text-secondary">
                     <option value="">Semua Lokasi</option>
                     {% for loc in lokasi_list %}
-                        <option value="{{ loc.id }}" {% if location_filter == loc.id %}selected{% endif %}>
+                        <option value="{{ loc.id }}" {% if location_filter == loc.id|stringformat:"s" %}selected{% endif %}>
                             {{ loc.nama }}
                         </option>
                     {% endfor %}
@@ -47,12 +53,10 @@
             </div>
 
             <div class="col-md-2">
-                <select name="status" class="form-select border-0 bg-light fw-medium text-secondary" style="cursor: pointer;">
+                <select name="status" class="form-select border-0 bg-light fw-medium text-secondary">
                     <option value="">Semua Status</option>
                     {% for code, label in status_choices %}
-                        <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>
-                            {{ label }}
-                        </option>
+                        <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -65,15 +69,13 @@
                     <input type="text" name="q" value="{{ query|default:'' }}" 
                            class="form-control border-0 bg-light" 
                            placeholder="Cari nama, SN, user..." autocomplete="off">
-                    <button class="btn btn-primary px-4" type="submit">Cari</button>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-<div id="table-container" class="card border-0 shadow-sm overflow-hidden">
+<div id="asset-table-body" class="card border-0 shadow-sm overflow-hidden fade-in">
     {% include 'assets/asset_table_partial.html' %}
 </div>
-
 {% endblock %}

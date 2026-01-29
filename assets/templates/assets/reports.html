@@ -11,9 +11,18 @@
         <h5 class="fw-bold text-dark m-0">Ringkasan Aset IT</h5>
         <span class="text-muted small">Update per hari ini: {% now "d F Y" %}</span>
     </div>
-    <button onclick="window.print()" class="btn btn-primary rounded-pill px-4">
-        <i class="bi bi-printer me-2"></i> Cetak Laporan
+    
+    <div class="d-flex gap-2">
+    <a href="{% url 'export_assets_csv' %}" 
+       class="btn btn-success rounded-pill px-4 shadow-sm" 
+       hx-boost="false">
+        <i class="bi bi-file-earmark-excel me-1"></i> Export CSV
+    </a>
+
+    <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 shadow-sm">
+        <i class="bi bi-printer me-2"></i> Cetak PDF
     </button>
+    </div>
 </div>
 
 <div class="card border-0 shadow-sm mb-4 border-start border-4 border-success">
@@ -110,11 +119,9 @@
 
 <style>
     @media print {
-        /* Sembunyikan Sidebar & Tombol saat print */
-        .sidebar, .btn-toggle-sidebar, .no-print, .btn {
+        .sidebar, .btn-toggle-sidebar, .no-print, .btn, .htmx-indicator {
             display: none !important;
         }
-        /* Lebarkan konten saat print */
         .main-content {
             margin-left: 0 !important;
             padding: 0 !important;
