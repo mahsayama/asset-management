@@ -20,15 +20,15 @@
 
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body p-3">
-        <form method="get" action="." class="row g-2" 
-              hx-get="{% url 'asset_list' %}" 
+        <form id="filter-form" method="get" action="." class="row g-2" 
+              hx-get="{% url 'asset_list' %}?page=1" 
               hx-target="#asset-table-body" 
               hx-swap="innerHTML" 
               hx-push-url="true"
               hx-indicator=".htmx-indicator"
-              hx-trigger="change, submit, keyup delay:500ms from:input[name='q']">
+              hx-trigger="change, submit, keyup delay:500ms from:input[name='q'], refreshTable from:body">
             
-            <input type="hidden" name="page" value="1">
+            <input type="hidden" name="sort" value="{{ sort_current }}">
             
             <div class="col-md-2">
                 <select name="category" class="form-select border-0 bg-light fw-medium text-secondary">
@@ -71,6 +71,8 @@
                            placeholder="Cari nama, SN, user..." autocomplete="off">
                 </div>
             </div>
+            
+            <div class="htmx-indicator spinner-border spinner-border-sm text-primary ms-2 my-auto" role="status"></div>
         </form>
     </div>
 </div>
@@ -78,4 +80,40 @@
 <div id="asset-table-body" class="card border-0 shadow-sm overflow-hidden fade-in">
     {% include 'assets/asset_table_partial.html' %}
 </div>
+
+<div id="modal-container" class="modal fade" tabindex="-1" aria-hidden="true">
+    <div id="modal-content" class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        </div>
+</div>
+
+<style>
+    body.modal-open #asset-table-body, 
+    body.modal-open .card-body,
+    body.modal-open .d-flex {
+        filter: blur(4px);
+        transition: filter 0.3s ease;
+    }
+    .modal-backdrop.show {
+        opacity: 0.7;
+        background-color: #000;
+        backdrop-filter: blur(2px);
+    }
+</style>
+
+<script>
+    document.body.addEventListener('closeModal', function() {
+        var modalEl = document.getElementById('modal-container');
+        var modalInstance = bootstrap.Modal.getInstance(modalEl);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+    });
+
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
 {% endblock %}

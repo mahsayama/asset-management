@@ -3,23 +3,40 @@
 <div class="table-responsive">
     <table class="table table-hover align-middle text-start mb-0">
         <thead class="bg-light">
-            <tr>
-                <th class="ps-4">Nama Aset</th>
+            <tr hx-target="#asset-table-body" hx-push-url="true" hx-include="#filter-form">
+                <th class="ps-4 pointer" style="cursor:pointer"
+                    hx-get="?sort={% if sort_current == 'name' %}-name{% else %}name{% endif %}">
+                    Nama Aset 
+                    {% if sort_current == 'name' %}<i class="bi bi-sort-alpha-down"></i>
+                    {% elif sort_current == '-name' %}<i class="bi bi-sort-alpha-up-alt"></i>
+                    {% else %}<i class="bi bi-arrow-down-up opacity-50"></i>{% endif %}
+                </th>
+                
                 <th>Barcode / SN</th>            
                 <th class="d-none d-md-table-cell">Kategori</th>
                 <th class="d-none d-md-table-cell">Lokasi</th>
-                <th>User / Dept Saat Ini</th>
-                <th class="d-none d-xl-table-cell">History</th> 
-                <th>Status</th>
+                <th>User / Dept</th>
+                
+                <th class="d-none d-xl-table-cell">Prev. User & Dept</th> 
+                
+                <th class="pointer" style="cursor:pointer"
+                    hx-get="?sort={% if sort_current == 'status' %}-status{% else %}status{% endif %}">
+                    Status
+                </th>
+
                 <th class="d-none d-lg-table-cell">Harga</th>
-                <th class="text-center" style="min-width: 120px;">Aksi</th> 
+
+                <th class="text-center pointer" style="min-width: 120px; cursor:pointer"
+                    hx-get="?sort={% if sort_current == '-created_at' %}created_at{% else %}-created_at{% endif %}">
+                    Aksi
+                </th> 
             </tr>
         </thead>
         <tbody>
             {% for asset in assets %}
             <tr>
                 <td class="ps-4">
-                    <div class="fw-bold text-dark">{{ asset.name }}</div>
+                    <div class="fw-bold text-dark">{{ asset.name|truncatechars:30 }}</div>
                     <small class="text-muted d-block d-md-none font-monospace mt-1">{{ asset.serial_number }}</small>
                 </td>
                 <td>
@@ -28,16 +45,26 @@
                     {% endif %}
                     <div class="small text-muted font-monospace d-none d-md-block">{{ asset.serial_number }}</div>
                 </td>
-                <td class="d-none d-md-table-cell text-muted small">{{ asset.kategori|default:"-" }}</td>
-                <td class="d-none d-md-table-cell text-muted small">{{ asset.lokasi|default:"-" }}</td>
+                <td class="d-none d-md-table-cell text-muted small">{{ asset.kategori.nama|default:"-" }}</td>
+                <td class="d-none d-md-table-cell text-muted small">{{ asset.lokasi.nama|default:"-" }}</td>
                 <td>
                     <div class="fw-medium text-dark">{{ asset.current_user|default:"-" }}</div>
                     <small class="text-muted d-block" style="font-size: 0.75rem;">{{ asset.current_dept|default:"" }}</small>
                 </td>
+
                 <td class="d-none d-xl-table-cell small text-muted">
-                    <div style="font-size: 0.75rem;"><i class="bi bi-clock-history"></i> {{ asset.prev_user|default:"-" }}</div>
-                    <div style="font-size: 0.75rem;"><i class="bi bi-building"></i> {{ asset.prev_dept|default:"-" }}</div>
+                    {% if asset.prev_user %}
+                        <div class="d-flex align-items-center mb-1" style="font-size: 0.72rem;">
+                            <i class="bi bi-person-dash me-1 text-secondary"></i> {{ asset.prev_user }}
+                        </div>
+                        <div class="d-flex align-items-center" style="font-size: 0.72rem;">
+                            <i class="bi bi-building me-1 text-secondary"></i> {{ asset.prev_dept|default:"-" }}
+                        </div>
+                    {% else %}
+                        <span class="opacity-50">—</span>
+                    {% endif %}
                 </td>
+
                 <td>
                     {% if asset.status == 'TERSEDIA' %}
                         <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1 fw-medium">Tersedia</span>
@@ -53,25 +80,31 @@
                     Rp {{ asset.price|intcomma|default:"0" }}
                 </td>
                 <td class="text-center">
-                    <a href="{% url 'asset_detail' asset.pk %}" class="text-primary text-decoration-none mx-1" title="Detail" data-bs-toggle="tooltip">
-                        <i class="bi bi-eye fs-5"></i>
-                    </a>
-                    <a href="{% url 'asset_update' asset.pk %}" class="text-warning text-decoration-none mx-1" title="Edit" data-bs-toggle="tooltip">
-                        <i class="bi bi-pencil-square fs-5"></i>
-                    </a>
-                    <a href="{% url 'asset_delete' asset.pk %}" class="text-danger text-decoration-none mx-1" title="Hapus" data-bs-toggle="tooltip">
-                        <i class="bi bi-trash fs-5"></i>
-                    </a>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'asset_detail' asset.pk %}" class="text-primary" title="Detail" data-bs-toggle="tooltip">
+                            <i class="bi bi-eye fs-5"></i>
+                        </a>
+                        <a href="{% url 'asset_update' asset.pk %}" class="text-warning" title="Edit" data-bs-toggle="tooltip">
+                            <i class="bi bi-pencil-square fs-5"></i>
+                        </a>
+                        
+                        <button hx-get="{% url 'asset_delete' asset.pk %}" 
+                                hx-target="#modal-content" 
+                                class="btn btn-link text-danger p-0 border-0" 
+                                style="text-decoration: none;"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#modal-container"
+                                title="Hapus">
+                            <i class="bi bi-trash fs-5"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             {% empty %}
             <tr>
                 <td colspan="9" class="text-center py-5">
-                    <div class="mb-3 text-muted opacity-25">
-                        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
-                    </div>
+                    <div class="mb-3 text-muted opacity-25"><i class="bi bi-inbox" style="font-size: 3rem;"></i></div>
                     <h6 class="fw-bold text-dark">Data Tidak Ditemukan</h6>
-                    <p class="small text-muted mb-0">Hasil filter tidak memiliki data aset.</p>
                 </td>
             </tr>
             {% endfor %}
@@ -81,28 +114,15 @@
 
 {% if assets.has_other_pages %}
 <div class="d-flex justify-content-between align-items-center p-3 border-top bg-white">
-    <small class="text-muted">
-        Halaman {{ assets.number }} dari {{ assets.paginator.num_pages }}
-    </small>
+    <small class="text-muted">Hal {{ assets.number }} dari {{ assets.paginator.num_pages }}</small>
     <div class="btn-group">
         {% if assets.has_previous %}
-        <button class="btn btn-sm btn-outline-secondary" 
-                hx-get="?page={{ assets.previous_page_number }}&q={{ query|default:'' }}&category={{ category_filter|default:'' }}&location={{ location_filter|default:'' }}&status={{ status_filter|default:'' }}"
-                hx-target="#asset-table-body" 
-                hx-push-url="true"
-                hx-indicator=".htmx-indicator"
-                hx-swap="innerHTML">
+        <button class="btn btn-sm btn-outline-secondary" hx-get="?page={{ assets.previous_page_number }}" hx-include="#filter-form" hx-target="#asset-table-body" hx-push-url="true" hx-swap="innerHTML">
             <i class="bi bi-chevron-left"></i> Prev
         </button>
         {% endif %}
-        
         {% if assets.has_next %}
-        <button class="btn btn-sm btn-outline-secondary" 
-                hx-get="?page={{ assets.next_page_number }}&q={{ query|default:'' }}&category={{ category_filter|default:'' }}&location={{ location_filter|default:'' }}&status={{ status_filter|default:'' }}"
-                hx-target="#asset-table-body" 
-                hx-push-url="true"
-                hx-indicator=".htmx-indicator"
-                hx-swap="innerHTML">
+        <button class="btn btn-sm btn-outline-secondary" hx-get="?page={{ assets.next_page_number }}" hx-include="#filter-form" hx-target="#asset-table-body" hx-push-url="true" hx-swap="innerHTML">
             Next <i class="bi bi-chevron-right"></i>
         </button>
         {% endif %}
@@ -111,7 +131,6 @@
 {% endif %}
 
 <script>
-    // Pastikan tooltip jalan lagi abis ganti konten
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)

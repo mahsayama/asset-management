@@ -35,23 +35,43 @@ def dashboard(request):
     }
     return render(request, 'dashboard.html', context)
 
-# 2. INVENTORY LIST
+# 2. INVENTORY LIST (FIXED LOGIC)
 @login_required
 def asset_list(request):
-    # ... (Bagian ambil parameter & filter tetap sama) ...
+    # Ambil parameter
     query = request.GET.get('q', '').strip()
     category_id = request.GET.get('category', '').strip()
     location_id = request.GET.get('location', '').strip()
     status_filter = request.GET.get('status', '').strip()
+    sort_by = request.GET.get('sort', '-created_at') # Tambahin parameter sort
     
     try:
         page_number = int(request.GET.get('page', 1))
     except (ValueError, TypeError):
         page_number = 1
 
-    assets_queryset = Asset.objects.select_related('kategori', 'lokasi').all().order_by('-created_at')
+    # Base Queryset
+    assets_queryset = Asset.objects.select_related('kategori', 'lokasi').all()
 
-    # ... (Logic filter Q & filter category/location tetap sama) ...
+    # --- JURUS FILTERING (DIBENERIN DI SINI) ---
+    if query:
+        assets_queryset = assets_queryset.filter(
+            Q(name__icontains=query) | 
+            Q(serial_number__icontains=query) |
+            Q(current_user__icontains=query)
+        )
+    
+    if category_id:
+        assets_queryset = assets_queryset.filter(kategori_id=category_id)
+    
+    if location_id:
+        assets_queryset = assets_queryset.filter(lokasi_id=location_id)
+        
+    if status_filter:
+        assets_queryset = assets_queryset.filter(status=status_filter)
+
+    # --- JURUS SORTING ---
+    assets_queryset = assets_queryset.order_by(sort_by)
 
     paginator = Paginator(assets_queryset, 10)
     page_obj = paginator.get_page(page_number)
@@ -62,18 +82,15 @@ def asset_list(request):
         'category_filter': category_id,
         'location_filter': location_id,
         'status_filter': status_filter,
+        'sort_current': sort_by, # Lempar ke template biar icon sort-nya aktif
         'kategori_list': Kategori.objects.all(),
         'lokasi_list': Lokasi.objects.all(),
         'status_choices': Asset.STATUS_CHOICES,
     }
 
-    # --- JURUS FIX LAYOUT PECAH ---
-    # Cek apakah request HTMX ini spesifik menargetkan tabel (#asset-table-body)
-    # Ini terjadi saat User klik Pagination atau submit Filter Search.
     if request.headers.get('HX-Request') and request.headers.get('HX-Target') == 'asset-table-body':
         return render(request, 'assets/asset_table_partial.html', context)
     
-    # Jika navigasi standar (Sidebar) atau Full Refresh, berikan Full Page.
     return render(request, 'assets/asset_list.html', context)
 
 # 3. CREATE
@@ -125,12 +142,15 @@ def asset_update(request, pk):
         form = AssetForm(instance=asset_obj)
     return render(request, 'assets/asset_form.html', {'form': form, 'title': 'Update Aset'})
 
-# 5. DETAIL
+# 5. DETAIL (FIXED changed_at ERROR)
 @login_required
 def asset_detail(request, pk):
     asset = get_object_or_404(Asset.objects.select_related('kategori', 'lokasi'), pk=pk)
-    history = asset.history.all().order_by('-changed_at')
+    # FIX: Ganti '-changed_at' jadi '-event_date' sesuai field di model lu
+    history = asset.history.all().order_by('-event_date')
     return render(request, 'assets/asset_detail.html', {'asset': asset, 'history': history})
+
+# ... sisa fungsi Reports, Export, Settings tetap sama ...
 
 # 6. DELETE
 @login_required
@@ -138,7 +158,17 @@ def asset_delete(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
     if request.method == 'POST':
         asset.delete()
+        
+        # --- JURUS ANTI BLUR ---
+        # Kalau request dari HTMX, jangan redirect full page.
+        # Cukup kasih tau frontend: "Tutup Modal" dan "Refresh Tabel"
+        if request.headers.get('HX-Request'):
+            response = HttpResponse(status=204) # 204 = Sukses tapi gak ada konten html
+            response['HX-Trigger'] = 'closeModal, refreshTable' 
+            return response
+            
         return redirect('asset_list')
+        
     return render(request, 'assets/asset_confirm_delete.html', {'asset': asset})
 
 # 7. REPORTS
