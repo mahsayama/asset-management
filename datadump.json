@@ -1,0 +1,1007 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2026-01-11T13:50:37.993Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "1",
+    "object_repr": "Laptop",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2026-01-11T13:50:43.000Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "2",
+    "object_repr": "PC",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2026-01-11T13:50:46.267Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "3",
+    "object_repr": "Printer",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 4,
+  "fields": {
+    "action_time": "2026-01-11T13:50:54.644Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "4",
+    "object_repr": "Scanner",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 5,
+  "fields": {
+    "action_time": "2026-01-11T13:50:58.313Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "5",
+    "object_repr": "Server",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 6,
+  "fields": {
+    "action_time": "2026-01-11T13:51:05.694Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "6",
+    "object_repr": "Network",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 7,
+  "fields": {
+    "action_time": "2026-01-11T13:51:14.649Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "7",
+    "object_repr": "Handphone",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 8,
+  "fields": {
+    "action_time": "2026-01-11T13:51:18.027Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "8",
+    "object_repr": "Tablet",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 9,
+  "fields": {
+    "action_time": "2026-01-11T13:51:21.698Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "9",
+    "object_repr": "UPS",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 10,
+  "fields": {
+    "action_time": "2026-01-11T13:51:28.533Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "10",
+    "object_repr": "Webcam",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 11,
+  "fields": {
+    "action_time": "2026-01-11T13:51:31.425Z",
+    "user": 1,
+    "content_type": 9,
+    "object_id": "11",
+    "object_repr": "Speaker",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 12,
+  "fields": {
+    "action_time": "2026-01-11T13:52:26.975Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "1",
+    "object_repr": "Gedung 32",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 13,
+  "fields": {
+    "action_time": "2026-01-11T13:52:31.322Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "2",
+    "object_repr": "Gedung 34",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 14,
+  "fields": {
+    "action_time": "2026-01-11T13:52:35.296Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "3",
+    "object_repr": "Gedung 38",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 15,
+  "fields": {
+    "action_time": "2026-01-11T13:52:41.902Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "4",
+    "object_repr": "Gedung 39",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 16,
+  "fields": {
+    "action_time": "2026-01-11T13:52:45.712Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "5",
+    "object_repr": "Gedung 26",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 17,
+  "fields": {
+    "action_time": "2026-01-11T13:53:17.301Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "6",
+    "object_repr": "Forest House",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 18,
+  "fields": {
+    "action_time": "2026-01-11T13:53:54.833Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "7",
+    "object_repr": "Jabodetabek",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 19,
+  "fields": {
+    "action_time": "2026-01-11T13:53:58.113Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "8",
+    "object_repr": "Jawa",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 20,
+  "fields": {
+    "action_time": "2026-01-11T13:54:01.685Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "9",
+    "object_repr": "Sumatera",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 21,
+  "fields": {
+    "action_time": "2026-01-11T13:54:05.149Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "10",
+    "object_repr": "Kalimantan",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 22,
+  "fields": {
+    "action_time": "2026-01-11T13:54:09.670Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "11",
+    "object_repr": "Sulawesi",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 23,
+  "fields": {
+    "action_time": "2026-01-11T13:54:30.670Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "12",
+    "object_repr": "Bali Nusa",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 24,
+  "fields": {
+    "action_time": "2026-01-11T13:54:36.647Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "13",
+    "object_repr": "Belitung",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 25,
+  "fields": {
+    "action_time": "2026-01-11T13:54:41.380Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "14",
+    "object_repr": "Luar Jawa",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 26,
+  "fields": {
+    "action_time": "2026-01-11T13:54:55.352Z",
+    "user": 1,
+    "content_type": 10,
+    "object_id": "15",
+    "object_repr": "Vendor",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$D8K34fTchlWjXQrYxEnEHg$DrEA+sHjrSGePtD+ge2NxhZy5X5GtrlL/Tc4qzj/UdU=",
+    "last_login": "2026-02-04T06:48:34.404Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-01-09T10:36:37.452Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "282bi38og9ivc1rvqwslhqfaj2x9kwe5",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP9lz4aw5dXt0bvfQIAFqRqalPZk_HfTpAe9zkzmDT7sW_V7z6ufGSZAuPyyGNIzt0PwI7T7ItLStnWO4kjEabu4LZxf17P9G9TQK0xgnWGprLNuKBgcEyvMJStMhoyJlIfAmkaDWsrRSHalMOlC7Iol1AifL8kQNzU:1vfUtX:-SeMhZ86lShlElOCNrkNqEZ5sR0sj7DlVYCDTwJ2ll8",
+    "expire_date": "2026-01-27T03:16:35.376Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "80thjl433do68jiyfyp05a9jqgjt2v8s",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP9lz4aw5dXt0bvfQIAFqRqalPZk_HfTpAe9zkzmDT7sW_V7z6ufGSZAuPyyGNIzt0PwI7T7ItLStnWO4kjEabu4LZxf17P9G9TQK0xgnWGprLNuKBgcEyvMJStMhoyJlIfAmkaDWsrRSHalMOlC7Iol1AifL8kQNzU:1vfJGC:wV-UIDxHA3jDozArszla3sZrDzDTvTQhU7CT7cWadMM",
+    "expire_date": "2026-01-26T14:51:12.957Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "fd79ulskdwtryt04e1bcyw2kxi3z3vix",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP9lz4aw5dXt0bvfQIAFqRqalPZk_HfTpAe9zkzmDT7sW_V7z6ufGSZAuPyyGNIzt0PwI7T7ItLStnWO4kjEabu4LZxf17P9G9TQK0xgnWGprLNuKBgcEyvMJStMhoyJlIfAmkaDWsrRSHalMOlC7Iol1AifL8kQNzU:1vl2mu:xaiacP45pkD-noVKBC3CNcvNzXlsxkM62pqUPmd_p6o",
+    "expire_date": "2026-02-11T10:28:40.769Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "pr49a22px9nz24iffalcugf1hvoulxh0",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP9lz4aw5dXt0bvfQIAFqRqalPZk_HfTpAe9zkzmDT7sW_V7z6ufGSZAuPyyGNIzt0PwI7T7ItLStnWO4kjEabu4LZxf17P9G9TQK0xgnWGprLNuKBgcEyvMJStMhoyJlIfAmkaDWsrRSHalMOlC7Iol1AifL8kQNzU:1vnWgk:uQxagiLqMNr6L339jDN37nbW8moZfh9Usn_mWlYWIeI",
+    "expire_date": "2026-02-18T06:48:34.425Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "r6nnn6trzqlud80msxr4oo1kyoxnuea6",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP9lz4aw5dXt0bvfQIAFqRqalPZk_HfTpAe9zkzmDT7sW_V7z6ufGSZAuPyyGNIzt0PwI7T7ItLStnWO4kjEabu4LZxf17P9G9TQK0xgnWGprLNuKBgcEyvMJStMhoyJlIfAmkaDWsrRSHalMOlC7Iol1AifL8kQNzU:1vl41M:D_Bb5pPoyAbq2SmK9WsT8Tj14wgQauKCpz_4MIT72lM",
+    "expire_date": "2026-02-11T11:47:40.502Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "twauplnba4igdn665gcpdwueg6s3ha62",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP9lz4aw5dXt0bvfQIAFqRqalPZk_HfTpAe9zkzmDT7sW_V7z6ufGSZAuPyyGNIzt0PwI7T7ItLStnWO4kjEabu4LZxf17P9G9TQK0xgnWGprLNuKBgcEyvMJStMhoyJlIfAmkaDWsrRSHalMOlC7Iol1AifL8kQNzU:1vl2a8:iieVvAwYVh6JbBxLamuvx078NQt3dFesVGI2MsdfUIw",
+    "expire_date": "2026-02-11T10:15:28.254Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "vd8c1n009yup2i07apym14sn6qdn69v6",
+  "fields": {
+    "session_data": ".eJxVjMsOwiAQAP9lz4aw5dXt0bvfQIAFqRqalPZk_HfTpAe9zkzmDT7sW_V7z6ufGSZAuPyyGNIzt0PwI7T7ItLStnWO4kjEabu4LZxf17P9G9TQK0xgnWGprLNuKBgcEyvMJStMhoyJlIfAmkaDWsrRSHalMOlC7Iol1AifL8kQNzU:1vf6cF:dr806YfIFJvz7Nn1ZSpCKTRqLNHG5ABM9QSI3ouUS4c",
+    "expire_date": "2026-01-26T01:21:07.490Z"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 1,
+  "fields": {
+    "nama": "Laptop"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 2,
+  "fields": {
+    "nama": "PC"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 3,
+  "fields": {
+    "nama": "Printer"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 4,
+  "fields": {
+    "nama": "Scanner"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 5,
+  "fields": {
+    "nama": "Server"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 6,
+  "fields": {
+    "nama": "Network"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 7,
+  "fields": {
+    "nama": "Handphone"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 8,
+  "fields": {
+    "nama": "Tablet"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 9,
+  "fields": {
+    "nama": "UPS"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 10,
+  "fields": {
+    "nama": "Webcam"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 11,
+  "fields": {
+    "nama": "Speaker"
+  }
+},
+{
+  "model": "assets.kategori",
+  "pk": 12,
+  "fields": {
+    "nama": "Monitor"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 1,
+  "fields": {
+    "nama": "Gedung 32"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 2,
+  "fields": {
+    "nama": "Gedung 34"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 3,
+  "fields": {
+    "nama": "Gedung 38"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 4,
+  "fields": {
+    "nama": "Gedung 39"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 5,
+  "fields": {
+    "nama": "Gedung 26"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 6,
+  "fields": {
+    "nama": "Forest House"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 7,
+  "fields": {
+    "nama": "Jabodetabek"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 8,
+  "fields": {
+    "nama": "Jawa"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 9,
+  "fields": {
+    "nama": "Sumatera"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 10,
+  "fields": {
+    "nama": "Kalimantan"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 11,
+  "fields": {
+    "nama": "Sulawesi"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 13,
+  "fields": {
+    "nama": "Belitung"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 14,
+  "fields": {
+    "nama": "Luar Jawa"
+  }
+},
+{
+  "model": "assets.lokasi",
+  "pk": 15,
+  "fields": {
+    "nama": "Vendor"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 1,
+  "fields": {
+    "name": "asus rog",
+    "barcode_id": "04260003",
+    "serial_number": "blasda54d5a4dsa454",
+    "kategori": 1,
+    "lokasi": 1,
+    "purchase_date": "2025-12-12",
+    "price": "8500000",
+    "status": "TERSEDIA",
+    "note": "",
+    "current_user": "budi",
+    "current_dept": "GA",
+    "prev_user": null,
+    "prev_dept": null,
+    "created_at": "2026-01-11T14:27:03.381Z",
+    "updated_at": "2026-01-11T14:27:03.381Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 2,
+  "fields": {
+    "name": "zotac",
+    "barcode_id": "04250004",
+    "serial_number": "1654646as4d65asd",
+    "kategori": 2,
+    "lokasi": 2,
+    "purchase_date": "2025-10-09",
+    "price": "2000000",
+    "status": "DIPAKAI",
+    "note": "",
+    "current_user": "lolo",
+    "current_dept": "IT",
+    "prev_user": "lalalala",
+    "prev_dept": "hrd",
+    "created_at": "2026-01-11T14:28:24.409Z",
+    "updated_at": "2026-01-11T14:28:24.409Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 3,
+  "fields": {
+    "name": "epson L3250",
+    "barcode_id": "04180005",
+    "serial_number": "asdasdasdasd",
+    "kategori": 3,
+    "lokasi": 4,
+    "purchase_date": "2025-10-03",
+    "price": "2500000",
+    "status": "DIPAKAI",
+    "note": "",
+    "current_user": "tia",
+    "current_dept": "IT",
+    "prev_user": "tono",
+    "prev_dept": "GA",
+    "created_at": "2026-01-28T11:07:55.448Z",
+    "updated_at": "2026-01-28T11:07:55.448Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 4,
+  "fields": {
+    "name": "lenovo legion",
+    "barcode_id": "04230005",
+    "serial_number": "asdnahdoahsoh131lh",
+    "kategori": 1,
+    "lokasi": 2,
+    "purchase_date": "2026-01-03",
+    "price": "15000000",
+    "status": "TERSEDIA",
+    "note": "",
+    "current_user": null,
+    "current_dept": null,
+    "prev_user": "rey",
+    "prev_dept": "finance",
+    "created_at": "2026-01-28T11:08:45.302Z",
+    "updated_at": "2026-01-28T11:08:45.302Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 5,
+  "fields": {
+    "name": "HP 7730",
+    "barcode_id": "08900023",
+    "serial_number": "bm,zxbckaskdb123213",
+    "kategori": 3,
+    "lokasi": 3,
+    "purchase_date": "2026-01-02",
+    "price": "5000000",
+    "status": "RUSAK",
+    "note": "",
+    "current_user": null,
+    "current_dept": null,
+    "prev_user": "yini",
+    "prev_dept": "Marketing",
+    "created_at": "2026-01-28T11:09:33.072Z",
+    "updated_at": "2026-01-28T11:09:33.072Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 6,
+  "fields": {
+    "name": "canon lide 120",
+    "barcode_id": "99850025",
+    "serial_number": "bchxbcmzbasbkdbas",
+    "kategori": 4,
+    "lokasi": 4,
+    "purchase_date": "2025-06-12",
+    "price": "2000000",
+    "status": "HILANG",
+    "note": "",
+    "current_user": null,
+    "current_dept": null,
+    "prev_user": "lalalala",
+    "prev_dept": "GA",
+    "created_at": "2026-01-28T11:10:18.357Z",
+    "updated_at": "2026-01-28T11:10:18.357Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 7,
+  "fields": {
+    "name": "HP 240G7",
+    "barcode_id": "04190056",
+    "serial_number": "xzczcsasdasda",
+    "kategori": 1,
+    "lokasi": 1,
+    "purchase_date": "2026-01-01",
+    "price": "8000000",
+    "status": "DIPAKAI",
+    "note": "",
+    "current_user": "lucy",
+    "current_dept": "HRD",
+    "prev_user": "joy",
+    "prev_dept": "Legal",
+    "created_at": "2026-01-28T11:11:20.600Z",
+    "updated_at": "2026-01-28T11:11:20.600Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 8,
+  "fields": {
+    "name": "poly camera",
+    "barcode_id": "18056652",
+    "serial_number": "cxvxcvdsfgsaf21341",
+    "kategori": 10,
+    "lokasi": 4,
+    "purchase_date": "2026-01-03",
+    "price": "25000000",
+    "status": "DIPAKAI",
+    "note": "",
+    "current_user": "heni",
+    "current_dept": "GA",
+    "prev_user": "juned",
+    "prev_dept": "IT",
+    "created_at": "2026-01-28T11:12:08.577Z",
+    "updated_at": "2026-01-28T11:12:08.577Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 13,
+  "fields": {
+    "name": "samsung s25",
+    "barcode_id": "06260007",
+    "serial_number": "13651464da6d",
+    "kategori": 7,
+    "lokasi": 7,
+    "purchase_date": null,
+    "price": null,
+    "status": "DIPAKAI",
+    "note": "",
+    "current_user": "joni",
+    "current_dept": "GA",
+    "prev_user": "tia",
+    "prev_dept": "sales",
+    "created_at": "2026-02-03T04:47:54.056Z",
+    "updated_at": "2026-02-03T04:47:54.056Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 14,
+  "fields": {
+    "name": "jabra",
+    "barcode_id": "99156635",
+    "serial_number": "asdsadbvcvzdaq",
+    "kategori": 11,
+    "lokasi": 1,
+    "purchase_date": null,
+    "price": "650000",
+    "status": "RUSAK",
+    "note": "",
+    "current_user": "dion",
+    "current_dept": "GA",
+    "prev_user": "jeremy",
+    "prev_dept": "PA",
+    "created_at": "2026-02-03T04:48:36.865Z",
+    "updated_at": "2026-02-04T04:18:07.079Z"
+  }
+},
+{
+  "model": "assets.asset",
+  "pk": 16,
+  "fields": {
+    "name": "ipad air",
+    "barcode_id": "04250006",
+    "serial_number": "3232318531",
+    "kategori": 8,
+    "lokasi": 1,
+    "purchase_date": "2025-10-22",
+    "price": null,
+    "status": "TERSEDIA",
+    "note": "",
+    "current_user": "heri",
+    "current_dept": "sales",
+    "prev_user": null,
+    "prev_dept": null,
+    "created_at": "2026-02-04T04:55:37.011Z",
+    "updated_at": "2026-02-04T04:55:37.011Z"
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 1,
+  "fields": {
+    "asset": 1,
+    "changed_by": 1,
+    "event_date": "2026-01-11T14:27:03.388Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 2,
+  "fields": {
+    "asset": 2,
+    "changed_by": 1,
+    "event_date": "2026-01-11T14:28:24.418Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 3,
+  "fields": {
+    "asset": 3,
+    "changed_by": 1,
+    "event_date": "2026-01-28T11:07:55.457Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 4,
+  "fields": {
+    "asset": 4,
+    "changed_by": 1,
+    "event_date": "2026-01-28T11:08:45.309Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 5,
+  "fields": {
+    "asset": 5,
+    "changed_by": 1,
+    "event_date": "2026-01-28T11:09:33.079Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 6,
+  "fields": {
+    "asset": 6,
+    "changed_by": 1,
+    "event_date": "2026-01-28T11:10:18.364Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 7,
+  "fields": {
+    "asset": 7,
+    "changed_by": 1,
+    "event_date": "2026-01-28T11:11:20.607Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 8,
+  "fields": {
+    "asset": 8,
+    "changed_by": 1,
+    "event_date": "2026-01-28T11:12:08.586Z",
+    "description": "Aset baru ditambahkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 14,
+  "fields": {
+    "asset": 13,
+    "changed_by": 1,
+    "event_date": "2026-02-03T04:47:54.060Z",
+    "description": "Aset baru didaftarkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 15,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-03T04:48:36.867Z",
+    "description": "Aset baru didaftarkan ke sistem."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 17,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-04T03:29:55.120Z",
+    "description": "Handover: boy -> lani"
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 18,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-04T03:48:39.049Z",
+    "description": "Update field: current_user, current_dept, prev_user, prev_dept"
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 19,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-04T04:01:00.485Z",
+    "description": "current_user: 'johan' -> 'teti' | current_dept: 'sales' -> 'hrd'"
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 20,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-04T04:04:35.493Z",
+    "description": "Pengguna Saat Ini: teti Γ₧¥ nona | Dept/Divisi Saat Ini: hrd Γ₧¥ markeitng | Pengguna Sebelumnya: johan Γ₧¥ - | Dept/Divisi Sebelumnya: sales Γ₧¥ -"
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 21,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-04T04:05:07.520Z",
+    "description": "Pengguna Saat Ini: nona Γ₧¥ tri | Dept/Divisi Saat Ini: markeitng Γ₧¥ sales | Pengguna Sebelumnya: teti Γ₧¥ - | Dept/Divisi Sebelumnya: hrd Γ₧¥ -"
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 22,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-04T04:09:25.584Z",
+    "description": "Status berubah dari 'Tersedia' menjadi 'Sedang Dipakai'; Pengguna Saat Ini berubah dari 'tri' menjadi 'jeremy'; Dept/Divisi Saat Ini berubah dari 'sales' menjadi 'PA'; Pengguna Sebelumnya berubah dari 'nona' menjadi '-'; Dept/Divisi Sebelumnya berubah dari 'markeitng' menjadi '-'."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 23,
+  "fields": {
+    "asset": 14,
+    "changed_by": 1,
+    "event_date": "2026-02-04T04:18:07.081Z",
+    "description": "Pengguna Sebelumnya berubah dari '-' menjadi 'jeremy'; Divisi Sebelumnya berubah dari '-' menjadi 'PA'; Lokasi berubah dari 'Luar Jawa' menjadi 'Gedung 32'; Status berubah dari 'Sedang Dipakai' menjadi 'Rusak'; Pengguna Saat Ini berubah dari 'jeremy' menjadi 'dion'; Dept/Divisi Saat Ini berubah dari 'PA' menjadi 'GA'."
+  }
+},
+{
+  "model": "assets.assethistory",
+  "pk": 24,
+  "fields": {
+    "asset": 16,
+    "changed_by": 1,
+    "event_date": "2026-02-04T04:55:37.013Z",
+    "description": "Aset baru didaftarkan ke sistem."
+  }
+}
+]

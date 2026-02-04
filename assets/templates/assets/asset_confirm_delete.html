@@ -1,26 +1,29 @@
-<div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-    <div class="modal-body text-center p-5">
-        <div class="text-danger mb-4">
-            <i class="bi bi-exclamation-octagon" style="font-size: 4rem;"></i>
+<form method="post" action="{% url 'asset_delete' asset.pk %}">
+    {% csrf_token %}
+    <div class="modal-content border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold text-danger">Konfirmasi Hapus</h5>
+            <button type="button" class="btn-close" onclick="document.body.dispatchEvent(new CustomEvent('closeModal'))"></button>
         </div>
-
-        <h4 class="fw-bold text-dark mb-2">Hapus Aset?</h4>
-        <p class="text-muted mb-4">
-            Apakah lu yakin mau menghapus aset:<br>
-            <strong class="text-dark">"{{ asset.name }}"</strong>?
-        </p>
-
-        <form hx-post="{% url 'asset_delete' asset.pk %}">
-            {% csrf_token %}
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-danger rounded-pill py-2 fw-bold shadow-sm">
-                    Ya, Hapus Permanen
-                </button>
-                <button type="button" class="btn btn-link text-secondary text-decoration-none fw-medium"
-                    data-bs-dismiss="modal">
-                    Batal
-                </button>
+        <div class="modal-body text-center py-4">
+            <div class="mb-3">
+                <i class="bi bi-exclamation-circle text-danger" style="font-size: 3rem;"></i>
             </div>
-        </form>
+            <p class="mb-1">Apakah Anda yakin ingin menghapus aset ini?</p>
+            <div class="fw-bold text-dark border p-2 rounded bg-light mt-2">
+                {{ asset.name }} <br>
+                <span class="small text-muted">{{ asset.serial_number }}</span>
+            </div>
+            <p class="text-muted small mt-2 mb-0">Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+        <div class="modal-footer border-0 pt-0 justify-content-center pb-4">
+            <button type="button" class="btn btn-light px-4 rounded-pill" onclick="document.body.dispatchEvent(new CustomEvent('closeModal'))">
+                Batal
+            </button>
+            
+            <button type="submit" class="btn btn-danger px-4 rounded-pill">
+                Ya, Hapus
+            </button>
+        </div>
     </div>
-</div>
+</form>

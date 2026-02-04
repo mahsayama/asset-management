@@ -1,4 +1,5 @@
 import csv
+import json  # <--- JANGAN LUPA INI
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.db.models import Q, Sum, Count
@@ -35,7 +36,7 @@ def dashboard(request):
     }
     return render(request, 'dashboard.html', context)
 
-# 2. INVENTORY LIST (FIXED LOGIC)
+# 2. INVENTORY LIST (FIXED: SEARCH BARCODE)
 @login_required
 def asset_list(request):
     # Ambil parameter
@@ -43,7 +44,7 @@ def asset_list(request):
     category_id = request.GET.get('category', '').strip()
     location_id = request.GET.get('location', '').strip()
     status_filter = request.GET.get('status', '').strip()
-    sort_by = request.GET.get('sort', '-created_at') # Tambahin parameter sort
+    sort_by = request.GET.get('sort', '-created_at')
     
     try:
         page_number = int(request.GET.get('page', 1))
@@ -53,12 +54,14 @@ def asset_list(request):
     # Base Queryset
     assets_queryset = Asset.objects.select_related('kategori', 'lokasi').all()
 
-    # --- JURUS FILTERING (DIBENERIN DI SINI) ---
+    # --- JURUS FILTERING ---
     if query:
         assets_queryset = assets_queryset.filter(
             Q(name__icontains=query) | 
             Q(serial_number__icontains=query) |
-            Q(current_user__icontains=query)
+            Q(barcode_id__icontains=query) | # <--- INI YANG TADI KETINGGALAN
+            Q(current_user__icontains=query) |
+            Q(current_dept__icontains=query) # Bonus: Biar bisa cari nama divisi juga
         )
     
     if category_id:
@@ -82,7 +85,7 @@ def asset_list(request):
         'category_filter': category_id,
         'location_filter': location_id,
         'status_filter': status_filter,
-        'sort_current': sort_by, # Lempar ke template biar icon sort-nya aktif
+        'sort_current': sort_by,
         'kategori_list': Kategori.objects.all(),
         'lokasi_list': Lokasi.objects.all(),
         'status_choices': Asset.STATUS_CHOICES,
@@ -106,6 +109,8 @@ def asset_create(request):
                     changed_by=request.user,
                     description="Aset baru didaftarkan ke sistem."
                 )
+            # FIX: Pindah ke SINI (sebelum return redirect)
+            messages.success(request, "Mantap! Aset berhasil ditambahkan.") 
             return redirect('asset_list')
     else:
         form = AssetForm()
@@ -114,63 +119,123 @@ def asset_create(request):
 # 4. UPDATE
 @login_required
 def asset_update(request, pk):
-    asset_obj = get_object_or_404(Asset, pk=pk)
-    old_user = asset_obj.current_user
-    old_dept = asset_obj.current_dept
-
+    asset = get_object_or_404(Asset, pk=pk)
+    
     if request.method == 'POST':
-        form = AssetForm(request.POST, request.FILES, instance=asset_obj)
+        form = AssetForm(request.POST, request.FILES, instance=asset) 
         if form.is_valid():
-            if form.has_changed():
-                changes = []
-                if 'current_user' in form.changed_data:
-                    asset_obj.prev_user = old_user
-                    asset_obj.prev_dept = old_dept
-                    changes.append(f"Handover: {old_user} -> {form.cleaned_data.get('current_user')}")
-                
-                with transaction.atomic():
-                    asset = form.save()
-                    AssetHistory.objects.create(
-                        asset=asset,
-                        changed_by=request.user,
-                        description=" | ".join(changes) if changes else "Update informasi aset."
-                    )
-            else:
-                form.save()
-            return redirect('asset_list')
-    else:
-        form = AssetForm(instance=asset_obj)
-    return render(request, 'assets/asset_form.html', {'form': form, 'title': 'Update Aset'})
+            with transaction.atomic():
+                if form.has_changed():
+                    instance = form.save(commit=False) 
+                    changes = [] 
+                    
+                    # --- 1. LOGIC SPESIAL: PERGESERAN USER (Current -> Prev) ---
+                    if 'current_user' in form.changed_data:
+                        old_curr_user = form.initial.get('current_user')
+                        old_curr_dept = form.initial.get('current_dept')
+                        
+                        old_prev_user = asset.prev_user
+                        old_prev_dept = asset.prev_dept
 
-# 5. DETAIL (FIXED changed_at ERROR)
+                        # A. UPDATE DATABASE
+                        instance.prev_user = old_curr_user
+                        instance.prev_dept = old_curr_dept
+
+                        # B. UPDATE HISTORY
+                        changes.append(f"Pengguna Sebelumnya berubah dari '{old_prev_user or '-'}' menjadi '{old_curr_user or '-'}'")
+                        
+                        if old_curr_dept != old_prev_dept:
+                             changes.append(f"Divisi Sebelumnya berubah dari '{old_prev_dept or '-'}' menjadi '{old_curr_dept or '-'}'")
+
+                    # --- 2. LOGIC STANDARD ---
+                    for field_name in form.changed_data:
+                        if field_name in ['prev_user', 'prev_dept']:
+                            continue
+                            
+                        field = form.fields[field_name]
+                        label = field.label or field_name.replace('_', ' ').title()
+                        
+                        old_raw = form.initial.get(field_name)
+                        new_raw = form.cleaned_data.get(field_name)
+
+                        if hasattr(field, 'choices') and field.choices:
+                            choices_dict = dict(field.choices)
+                            old_val = choices_dict.get(old_raw, old_raw)
+                            new_val = choices_dict.get(new_raw, new_raw)
+                        else:
+                            old_val = old_raw
+                            new_val = new_raw
+
+                        if old_val is None or old_val == '': old_val = '-'
+                        if new_val is None or new_val == '': new_val = '-'
+                        if hasattr(new_val, '__str__'): new_val = str(new_val)
+                        if hasattr(old_val, '__str__'): old_val = str(old_val)
+
+                        changes.append(f"{label} berubah dari '{old_val}' menjadi '{new_val}'")
+                    
+                    desc = "; ".join(changes) + "."
+                    
+                    instance.save()
+                    form.save_m2m()
+                    
+                    AssetHistory.objects.create(
+                        asset=instance,
+                        changed_by=request.user,
+                        description=desc
+                    )
+                else:
+                    form.save()
+            
+            # Tambahan: Kasih Toast Success juga pas update
+            messages.success(request, "Data aset berhasil diperbarui.")        
+            return redirect('asset_list')
+            
+    else:
+        form = AssetForm(instance=asset)
+    
+    return render(request, 'assets/asset_form.html', {
+        'form': form, 
+        'title': 'Edit Aset',
+        'asset': asset 
+    })
+
+# 5. DETAIL
 @login_required
 def asset_detail(request, pk):
     asset = get_object_or_404(Asset.objects.select_related('kategori', 'lokasi'), pk=pk)
-    # FIX: Ganti '-changed_at' jadi '-event_date' sesuai field di model lu
-    history = asset.history.all().order_by('-event_date')
-    return render(request, 'assets/asset_detail.html', {'asset': asset, 'history': history})
+    histories = asset.history.all().order_by('-event_date') 
+    
+    return render(request, 'assets/asset_detail.html', {
+        'asset': asset,
+        'histories': histories,
+    })
 
-# ... sisa fungsi Reports, Export, Settings tetap sama ...
-
-# 6. DELETE
+# 6. DELETE (FIXED: Gak Ada Double Message)
 @login_required
 def asset_delete(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
     if request.method == 'POST':
         asset.delete()
         
-        # --- JURUS ANTI BLUR ---
-        # Kalau request dari HTMX, jangan redirect full page.
-        # Cukup kasih tau frontend: "Tutup Modal" dan "Refresh Tabel"
+        # --- JURUS 1: Kalau HTMX, Pakai Trigger Aja (Jangan pake messages.error) ---
         if request.headers.get('HX-Request'):
-            response = HttpResponse(status=204) # 204 = Sukses tapi gak ada konten html
-            response['HX-Trigger'] = 'closeModal, refreshTable' 
+            response = HttpResponse(status=204)
+            trigger_data = {
+                'closeModal': True,
+                'refreshTable': True,
+                'showToast': {
+                    'message': 'Aset telah berhasil dihapus.',
+                    'tags': 'danger'
+                }
+            }
+            response['HX-Trigger'] = json.dumps(trigger_data)
             return response
             
+        # --- JURUS 2: Kalau BUKAN HTMX (Fallback), Baru pake messages ---
+        messages.error(request, "Aset telah dihapus.")
         return redirect('asset_list')
         
     return render(request, 'assets/asset_confirm_delete.html', {'asset': asset})
-
 # 7. REPORTS
 @login_required
 def reports_view(request):

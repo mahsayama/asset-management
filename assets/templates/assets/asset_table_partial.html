@@ -48,10 +48,26 @@
                 <td class="d-none d-md-table-cell text-muted small">{{ asset.kategori.nama|default:"-" }}</td>
                 <td class="d-none d-md-table-cell text-muted small">{{ asset.lokasi.nama|default:"-" }}</td>
                 <td>
-                    <div class="fw-medium text-dark">{{ asset.current_user|default:"-" }}</div>
-                    <small class="text-muted d-block" style="font-size: 0.75rem;">{{ asset.current_dept|default:"" }}</small>
+                    {% if asset.current_user %}
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-bold me-2 border border-primary-subtle" 
+                                style="width: 38px; height: 38px; min-width: 38px; font-size: 0.9rem;">
+                                {{ asset.current_user|slice:":1"|upper }}
+                            </div>
+                            
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ asset.current_user }}</div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                    {{ asset.current_dept|default:"-" }}
+                                </small>
+                            </div>
+                        </div>
+                    {% else %}
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle rounded-pill px-3 py-1 fw-normal">
+                            <i class="bi bi-box-seam me-1"></i> Storage
+                        </span>
+                    {% endif %}
                 </td>
-
                 <td class="d-none d-xl-table-cell small text-muted">
                     {% if asset.prev_user %}
                         <div class="d-flex align-items-center mb-1" style="font-size: 0.72rem;">
@@ -136,3 +152,6 @@
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
 </script>
+<span id="total-asset-count" hx-swap-oob="true" class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
+    <i class="bi bi-box-seam me-1"></i> Total Data: {{ assets.paginator.count }} Unit
+</span>

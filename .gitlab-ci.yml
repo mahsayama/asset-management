@@ -12,7 +12,7 @@ stages:
   - test
   - deploy
 
-# --- STAGE 1: BUILD ---
+# --- STAGE 1: BUILD (Aman, gak berubah) ---
 build_image:
   stage: build
   script:
@@ -24,17 +24,31 @@ build_image:
     - docker push $IMAGE_TAG
     - docker push $LATEST_TAG
 
-# --- STAGE 2: UNIT TESTING ---
+# --- STAGE 2: UNIT TESTING (Perlu Service Postgres Sementara) ---
 test_application:
   stage: test
   image: python:3.12-slim
+  # Kita butuh service postgres buat testing di GitLab Runner
+  services:
+    - name: postgres:15
+      alias: postgres
+  variables:
+    # Settingan DB Dummy buat Testing
+    POSTGRES_DB: test_db
+    POSTGRES_USER: runner
+    POSTGRES_PASSWORD: password
+    POSTGRES_HOST_AUTH_METHOD: trust
+    # Kasih tau Django connect kemana
+    DB_HOST: postgres
+    DB_NAME: test_db
+    DB_USER: runner
+    DB_PASSWORD: password
   script:
-    - echo "Setup Environment untuk Testing..."
+    - apt-get update && apt-get install -y gcc libpq-dev  # Install driver di runner
     - pip install -r requirements.txt
-    - echo "Jalanin Django Unit Test..."
     - python manage.py test
 
-# --- STAGE 3: DEPLOY STAGING (OTOMATIS) ---
+# --- STAGE 3: DEPLOY STAGING ---
 deploy_staging:
   stage: deploy
   image: alpine:latest
@@ -49,21 +63,32 @@ deploy_staging:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - echo "Deploy ke STAGING Server (Port 8080)..."
-    # Menggunakan blok text (|) biar aman dari error kutip/spasi
+    - echo "Deploy ke STAGING Server..."
     - |
       ssh $SSH_USER@$SSH_IP "
         docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD;
-        echo 'Restarting Staging Container...';
         docker stop web-staging || true;
         docker rm web-staging || true;
         docker pull $IMAGE_TAG;
-        docker run -d -p 8080:8000 -v /home/$SSH_USER/db_staging.sqlite3:/app/db.sqlite3 --name web-staging $IMAGE_TAG;
+        
+        # PERUBAHAN UTAMA DI SINI:
+        # 1. Connect ke network yg sama dgn DB (--network asset-network)
+        # 2. Inject Env Variable DB (-e ...)
+        # 3. Gak pake -v sqlite lagi
+        docker run -d -p 8080:8000 \
+          --name web-staging \
+          --network asset-network \
+          -e DB_HOST=db-staging \
+          -e DB_NAME=asset_db \
+          -e DB_USER=mahsaserver \
+          -e DB_PASSWORD=rahasia_staging \
+          $IMAGE_TAG;
+          
         docker exec web-staging python manage.py migrate;
         docker exec web-staging python manage.py collectstatic --noinput;
       "
 
-# --- STAGE 4: DEPLOY PRODUCTION (MANUAL) ---
+# --- STAGE 4: DEPLOY PRODUCTION ---
 deploy_production:
   stage: deploy
   image: alpine:latest
@@ -80,17 +105,24 @@ deploy_production:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - echo "Deploy ke PRODUCTION Server (Port 80)..."
+    - echo "Deploy ke PRODUCTION Server..."
     - |
       ssh $SSH_USER@$SSH_IP "
         docker login registry.gitlab.com -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD;
-        echo 'Restarting Production Container...';
         docker stop web-production || true;
         docker rm web-production || true;
-        docker stop web-simulasi || true;
-        docker rm web-simulasi || true;
         docker pull $IMAGE_TAG;
-        docker run -d -p 80:8000 -v /home/$SSH_USER/db_production.sqlite3:/app/db.sqlite3 --name web-production $IMAGE_TAG;
+        
+        # CONFIG PROD JUGA SAMA:
+        docker run -d -p 80:8000 \
+          --name web-production \
+          --network asset-network \
+          -e DB_HOST=db-production \
+          -e DB_NAME=asset_db \
+          -e DB_USER=mahsaserver \
+          -e DB_PASSWORD=rahasia_prod \
+          $IMAGE_TAG;
+          
         docker exec web-production python manage.py migrate;
         docker exec web-production python manage.py collectstatic --noinput;
       "

@@ -7,7 +7,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div class="d-flex gap-2">
-        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
+        <span id="total-asset-count" class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill border border-primary-subtle">
             <i class="bi bi-box-seam me-1"></i> Total Data: {{ assets.paginator.count }} Unit
         </span>
     </div>
@@ -25,7 +25,7 @@
               hx-target="#asset-table-body" 
               hx-swap="innerHTML" 
               hx-push-url="true"
-              hx-indicator=".htmx-indicator"
+              hx-indicator="#asset-table-body"
               hx-trigger="change, submit, keyup delay:500ms from:input[name='q'], refreshTable from:body">
             
             <input type="hidden" name="sort" value="{{ sort_current }}">
@@ -71,8 +71,6 @@
                            placeholder="Cari nama, SN, user..." autocomplete="off">
                 </div>
             </div>
-            
-            <div class="htmx-indicator spinner-border spinner-border-sm text-primary ms-2 my-auto" role="status"></div>
         </form>
     </div>
 </div>
@@ -83,32 +81,32 @@
 
 <div id="modal-container" class="modal fade" tabindex="-1" aria-hidden="true">
     <div id="modal-content" class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        </div>
+    </div>
 </div>
 
 <style>
-    body.modal-open #asset-table-body, 
-    body.modal-open .card-body,
-    body.modal-open .d-flex {
-        filter: blur(4px);
+    /* Style Blur saat Modal Aktif */
+    body.modal-open .card, 
+    body.modal-open .d-flex.justify-content-between {
+        filter: blur(5px);
         transition: filter 0.3s ease;
+        pointer-events: none;
     }
     .modal-backdrop.show {
-        opacity: 0.7;
+        opacity: 0.5; 
         background-color: #000;
-        backdrop-filter: blur(2px);
+    }
+    #modal-container {
+        filter: none !important;
+        z-index: 1060;
     }
 </style>
 
 <script>
-    document.body.addEventListener('closeModal', function() {
-        var modalEl = document.getElementById('modal-container');
-        var modalInstance = bootstrap.Modal.getInstance(modalEl);
-        if (modalInstance) {
-            modalInstance.hide();
-        }
-    });
-
+    // SCRIPT BERSIH:
+    // Logic 'closeModal' SUDAH DIHAPUS dari sini (karena sudah pindah ke base.html)
+    
+    // Kita sisakan ini saja biar tooltip tetap jalan setelah filter/sort
     document.body.addEventListener('htmx:afterSwap', function(evt) {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {

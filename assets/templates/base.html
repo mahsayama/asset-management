@@ -44,27 +44,31 @@
             transition: margin-left var(--transition-speed) ease;
         }
 
-        /* Loading Bar HTMX (Pengganti Turbo Progress Bar) */
+        /* Loading Bar HTMX */
         .htmx-indicator {
             opacity: 0;
             transition: opacity 200ms ease-in;
             position: fixed; top: 0; left: 0; width: 100%; height: 3px; 
             background: var(--primary-color); z-index: 9999;
         }
-        .htmx-request .htmx-indicator {
-            opacity: 1; /* Muncul pas lagi loading */
-        }
-        .htmx-request.htmx-indicator {
-            opacity: 1;
+        .htmx-request .htmx-indicator { opacity: 1; }
+        .htmx-request.htmx-indicator { opacity: 1; }
+
+        /* ANIMASI UPDATE (MODERN FADE & BLUR) */
+        .htmx-request.fade-in,
+        .htmx-request .fade-in {
+            opacity: 0.5;
+            filter: blur(2px);
+            transition: all 0.2s ease-in;
         }
 
-        /* ANIMASI FADE-IN */
         .fade-in {
-            animation: fadeIn 0.4s ease-out;
+            animation: modernFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        @keyframes modernFadeIn {
+            from { opacity: 0; filter: blur(5px); transform: scale(0.99); }
+            to { opacity: 1; filter: blur(0); transform: scale(1); }
         }
 
         /* LOGIKA COLLAPSED */
@@ -73,15 +77,11 @@
         
         html.collapsed .sidebar .nav-link span,
         html.collapsed .sidebar .sidebar-text,
-        html.collapsed .sidebar .btn-text { 
-            opacity: 0; pointer-events: none; display: none; 
-        }
+        html.collapsed .sidebar .btn-text { opacity: 0; pointer-events: none; display: none; }
 
         html.collapsed .sidebar .nav-link,
         html.collapsed .sidebar .sidebar-brand,
-        html.collapsed .sidebar .mt-auto { 
-            justify-content: center; padding-left: 0; padding-right: 0; 
-        }
+        html.collapsed .sidebar .mt-auto { justify-content: center; padding-left: 0; padding-right: 0; }
         html.collapsed .sidebar .sidebar-brand i { margin-right: 0 !important; }
 
         .icon-collapsed { display: none; }
@@ -112,13 +112,13 @@
 
     <div id="permanent-sidebar" class="sidebar d-flex flex-column" hx-preserve>
         <div class="p-4 border-bottom d-flex align-items-center sidebar-brand" style="height: 80px;">
-             <div class="fw-bold text-primary m-0 d-flex align-items-center" style="letter-spacing: -0.5px; line-height: 1.2;">
+             <a href="{% url 'dashboard' %}" class="text-decoration-none fw-bold text-primary m-0 d-flex align-items-center" style="letter-spacing: -0.5px; line-height: 1.2;">
                 <i class="bi bi-box-seam-fill me-2 fs-4"></i>
                 <div class="sidebar-text">
                     ASSET MANAGEMENT<br>
                     <span class="small text-muted fw-normal" style="font-size: 0.7rem;">SYSTEM V1.0</span>
                 </div>
-             </div>
+             </a>
         </div>
 
         <nav class="nav flex-column mt-3" id="sidebar-nav-links">
@@ -178,28 +178,47 @@
         </div>
     </div>
 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1070;">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="toast align-items-center text-bg-{{ message.tags|default:'primary' }} border-0 shadow-lg fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body d-flex align-items-center gap-2">
+                        {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill fs-5"></i>
+                        {% elif message.tags == 'error' %}<i class="bi bi-x-circle-fill fs-5"></i>
+                        {% elif message.tags == 'warning' %}<i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        {% else %}<i class="bi bi-info-circle-fill fs-5"></i>{% endif %}
+                        <span class="fw-medium">{{ message }}</span>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Fungsi Init Sidebar Toggle
+        // --- VARIABLE GLOBAL ---
+        let myModal = null; // Untuk handle modal anti-freeze
+
+        // --- FUNGSI INIT SIDEBAR ---
         function initSidebarLogic() {
             const sidebarToggle = document.getElementById('sidebarToggle');
             const html = document.documentElement;
 
             if (sidebarToggle) {
-                // Clone biar gak double listener pas htmx swap
                 const newToggle = sidebarToggle.cloneNode(true);
                 if(sidebarToggle.parentNode) {
                     sidebarToggle.parentNode.replaceChild(newToggle, sidebarToggle);
                 }
-                
                 newToggle.addEventListener('click', function() {
                     html.classList.toggle('collapsed');
                     localStorage.setItem('sidebar-collapsed', html.classList.contains('collapsed'));
                 });
             }
 
-            // Logic Menu Aktif (Biru)
             const currentPath = window.location.pathname;
             document.querySelectorAll('#sidebar-nav-links .nav-link').forEach(link => {
                 link.classList.remove('active');
@@ -209,14 +228,105 @@
             });
         }
 
-        // 1. Jalan pas pertama kali load
-        document.addEventListener('DOMContentLoaded', initSidebarLogic);
+        // --- DOM LOADED LISTENER ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Jalanin Sidebar
+            initSidebarLogic();
 
-        // 2. Jalan setiap kali HTMX selesai ganti halaman (SPA Mode)
-        document.addEventListener('htmx:afterSwap', initSidebarLogic);
+            // 2. Jalanin Toast Bawaan Django (Fallback)
+            var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+            var toastList = toastElList.map(function (toastEl) {
+                return new bootstrap.Toast(toastEl, { delay: 4000 }).show(); 
+            });
+        });
+
+        // --- HTMX LISTENERS ---
         
-        // 3. Update menu aktif kalau user klik back/forward browser
-        document.addEventListener('htmx:historyRestore', initSidebarLogic);
+        // 1. Setelah konten berubah (Swap)
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            initSidebarLogic(); // Re-init sidebar
+
+            // Logic Buka Modal (Anti-Freeze Part 1)
+            if (evt.target.id === "modal-content") {
+                const modalEl = document.getElementById('modal-container');
+                if (myModal) myModal.dispose(); // Bersihkan instance lama
+                myModal = new bootstrap.Modal(modalEl);
+                myModal.show();
+            }
+        });
+
+        // 2. History Restore (Back Button)
+        document.body.addEventListener('htmx:historyRestore', initSidebarLogic);
+
+        // --- CUSTOM EVENT LISTENERS ---
+
+        // 1. Event: showToast (Dari HTMX Trigger JSON)
+        if (!window.hasToastListener) {
+            document.body.addEventListener('showToast', function(evt) {
+                const data = evt.detail; 
+                const message = data.message;
+                const type = data.tags; 
+                
+                let icon = 'bi-info-circle-fill';
+                if (type === 'success') icon = 'bi-check-circle-fill';
+                if (type === 'danger') icon = 'bi-x-circle-fill';
+                if (type === 'warning') icon = 'bi-exclamation-triangle-fill';
+
+                const toastHtml = `
+                    <div class="toast align-items-center text-bg-${type} border-0 shadow-lg fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body d-flex align-items-center gap-2">
+                                <i class="bi ${icon} fs-5"></i>
+                                <span class="fw-medium">${message}</span>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `;
+
+                const container = document.querySelector('.toast-container');
+                if (container) {
+                    container.insertAdjacentHTML('beforeend', toastHtml);
+                    const newToastEl = container.lastElementChild;
+                    const toastInstance = new bootstrap.Toast(newToastEl, { delay: 4000 });
+                    toastInstance.show();
+                    
+                    // Bersihkan memori DOM setelah hide
+                    newToastEl.addEventListener('hidden.bs.toast', function () {
+                        newToastEl.remove();
+                    });
+                }
+            });
+            window.hasToastListener = true;
+        }
+
+        // 2. Event: closeModal (Anti-Freeze Part 2 - Jurus Sapu Jagat)
+        if (!window.hasModalListener) {
+            document.body.addEventListener('closeModal', function() {
+                const modalEl = document.getElementById('modal-container');
+                
+                if (myModal) {
+                    myModal.hide();
+                } else {
+                    const instance = bootstrap.Modal.getInstance(modalEl);
+                    if (instance) instance.hide();
+                }
+
+                // Paksa Bersih (Penting buat Anti-Freeze)
+                setTimeout(() => {
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('padding-right');
+                    document.body.style.removeProperty('overflow');
+                    
+                    if (myModal) {
+                        myModal.dispose(); 
+                        myModal = null;
+                    }
+                }, 200);
+            });
+            window.hasModalListener = true;
+        }
     </script>
 
     {% block scripts %}{% endblock %}
