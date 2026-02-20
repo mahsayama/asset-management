@@ -35,7 +35,7 @@ def dashboard(request):
         'cat_counts': cat_counts,
         'recent_assets': recent_assets,
     }
-    return render(request, 'dashboard.html', context)
+    return render(request, 'assets/dashboard.html', context)
 
 # 2. INVENTORY LIST (FIXED: SEARCH BARCODE)
 @login_required
@@ -257,7 +257,7 @@ def reports_view(request):
         'category_report': category_report,
         'location_report': location_report,
     }
-    return render(request, 'reports.html', context)
+    return render(request, 'assets/reports.html', context)
 
 # 8. EXPORT CSV
 @login_required
@@ -365,10 +365,6 @@ def import_assets_excel(request):
                     else:
                         status_db = 'TERSEDIA' # Default-nya Tersedia
                     # ---------------------------------------
-
-                    # Bonus FIX: Biar kalau ada user nulis harga '5.000.000' gak error
-                    harga_raw = str(row.get('Harga', '0')).replace('.', '').replace(',', '').strip()
-                    # ... lanjut ke bawahnya ...
 
                     # Bonus FIX 4: Biar kalau ada user nulis harga '5.000.000' gak error
                     harga_raw = str(row.get('Harga', '0')).replace('.', '').replace(',', '').strip()

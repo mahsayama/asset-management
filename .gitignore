@@ -6,9 +6,15 @@ venv/
 __pycache__/
 *.pyc
 
-# (Opsional) Abaikan database lokal biar data di server nanti fresh
-# Kalau lu mau data laptop kebawa ke server, hapus baris di bawah ini:
+# 🚨 INI YANG PALING PENTING: Abaikan file rahasia 🚨
+.env
+
+# Abaikan database lokal SQLite (walaupun lo udah pake Postgres)
 db.sqlite3
+
+# Abaikan folder static kumpilan (biar enteng pas di-push)
+staticfiles/
+static/
 
 # Abaikan settingan VS Code
 .vscode/

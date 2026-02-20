@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv # <--- Tambahin ini
 """
 Django settings for config project.
 
@@ -13,18 +14,15 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# 1. Definisikan BASE_DIR dulu
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 2. Paksa baca .env tepat di lokasi BASE_DIR
+load_dotenv(BASE_DIR / '.env')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0uv&ax19ru9#&qq07z1*o1rm9b+dd%79()r%a7r91nv_5k+rmz'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# 3. Baru panggil variabelnya
+SECRET_KEY = os.environ.get('SECRET_KEY')
+DEBUG = os.environ.get('DEBUG') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -85,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'asset_db',       # Pastikan nama DB ini ada di pgAdmin lo
         'USER': 'postgres',       # User default lokal lo
-        'PASSWORD': 'formula123#', # Tulis langsung password lo disini! (Hati-hati typo)
+        'PASSWORD': os.environ.get('DB_PASSWORD'), # <--- SEKARANG AMAN!
         'HOST': 'localhost',
         'PORT': '5432',
     }
