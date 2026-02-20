@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'asset_db',       # Pastikan nama DB ini ada di pgAdmin lo
         'USER': 'postgres',       # User default lokal lo
         'PASSWORD': os.environ.get('DB_PASSWORD'), # <--- SEKARANG AMAN!
-        'HOST': 'localhost',
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
         'PORT': '5432',
     }
 }

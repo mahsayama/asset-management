@@ -33,16 +33,20 @@ test_application:
     - name: postgres:15
       alias: postgres
   variables:
-    # Settingan DB Dummy buat Testing
-    POSTGRES_DB: test_db
-    POSTGRES_USER: runner
+    # FIX 1: Samain nama DB dan User dengan yang ada di settings.py
+    POSTGRES_DB: asset_db
+    POSTGRES_USER: postgres
     POSTGRES_PASSWORD: password
     POSTGRES_HOST_AUTH_METHOD: trust
-    # Kasih tau Django connect kemana
+    
+    # FIX 2: Kasih tau Django buat connect ke service postgres ini
     DB_HOST: postgres
-    DB_NAME: test_db
-    DB_USER: runner
+    DB_NAME: asset_db
+    DB_USER: postgres
     DB_PASSWORD: password
+    
+    # FIX 3: Tambahin Dummy Secret Key biar Django mau jalan di GitLab Runner
+    SECRET_KEY: "rahasia-dummy-buat-testing-doang"
   script:
     - apt-get update && apt-get install -y gcc libpq-dev  # Install driver di runner
     - pip install -r requirements.txt
