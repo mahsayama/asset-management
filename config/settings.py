@@ -81,11 +81,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'asset_db',       # Pastikan nama DB ini ada di pgAdmin lo
-        'USER': 'postgres',       # User default lokal lo
-        'PASSWORD': os.environ.get('DB_PASSWORD'), # <--- SEKARANG AMAN!
+        # Ambil dari environment CI/CD, kalau kosong pakai default lokal lo
+        'NAME': os.environ.get('DB_NAME', 'asset_db'),       
+        'USER': os.environ.get('DB_USER', 'postgres'),       
+        'PASSWORD': os.environ.get('DB_PASSWORD'), 
         'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': '5432',
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
