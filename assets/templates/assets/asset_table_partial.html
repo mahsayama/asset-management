@@ -24,7 +24,7 @@
                     Status
                 </th>
 
-                <th class="d-none d-lg-table-cell">Harga</th>
+                <th class="d-none d-lg-table-cell text-nowrap">Harga</th>
 
                 <th class="text-center pointer" style="min-width: 120px; cursor:pointer"
                     hx-get="?sort={% if sort_current == '-created_at' %}created_at{% else %}-created_at{% endif %}">
@@ -82,19 +82,23 @@
                 </td>
 
                 <td>
-                    {% if asset.status == 'TERSEDIA' %}
-                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1 fw-medium">Tersedia</span>
-                    {% elif asset.status == 'DIPAKAI' %}
-                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-3 py-1 fw-medium">Dipakai</span>
+                    {% if asset.status == 'DIPAKAI' %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">Sedang Dipakai</span>
+                    {% elif asset.status == 'TERSEDIA' %}
+                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1">Tersedia</span>
                     {% elif asset.status == 'RUSAK' %}
-                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-medium">Rusak</span>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">Rusak</span>
+                    {% elif asset.status == 'HILANG' %}
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-1">Hilang</span>
                     {% else %}
-                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning-subtle rounded-pill px-3 py-1 fw-medium">Hilang</span>
+                        <span class="badge bg-light text-dark border rounded-pill px-3 py-1">{{ asset.get_status_display }}</span>
                     {% endif %}
                 </td>
-                <td class="d-none d-lg-table-cell font-monospace fw-medium text-dark">
+                
+                <td class="d-none d-lg-table-cell font-monospace fw-medium text-dark text-nowrap">
                     Rp {{ asset.price|intcomma|default:"0" }}
                 </td>
+                
                 <td class="text-center">
                     <div class="d-flex justify-content-center gap-2">
                         <a href="{% url 'asset_detail' asset.pk %}" class="text-primary" title="Detail" data-bs-toggle="tooltip">

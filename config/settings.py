@@ -78,14 +78,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# config/settings.py
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'asset_db'),       # Baca Env, kalau gak ada pake 'asset_db'
-        'USER': os.environ.get('DB_USER', 'postgres'),       # Default user lo
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'password_lo'), # Ganti 'password_lo' dgn password asli lo buat local
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+        'NAME': 'asset_db',       # Pastikan nama DB ini ada di pgAdmin lo
+        'USER': 'postgres',       # User default lokal lo
+        'PASSWORD': 'formula123#', # Tulis langsung password lo disini! (Hati-hati typo)
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

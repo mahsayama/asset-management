@@ -6,22 +6,20 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4 no-print">
-    <div>
-        <h5 class="fw-bold text-dark m-0">Ringkasan Aset IT</h5>
-        <span class="text-muted small">Update per hari ini: {% now "d F Y" %}</span>
+<div class="d-md-flex justify-content-between align-items-center mb-4">
+    <div class="mb-3 mb-md-0">
+        <h4 class="fw-bold mb-1">Ringkasan Aset IT</h4>
+        <p class="text-muted small mb-0">Update per hari ini: {% now "d F Y" %}</p>
     </div>
     
-    <div class="d-flex gap-2">
-    <a href="{% url 'export_assets_csv' %}" 
-       class="btn btn-success rounded-pill px-4 shadow-sm" 
-       hx-boost="false">
-        <i class="bi bi-file-earmark-excel me-1"></i> Export CSV
-    </a>
-
-    <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 shadow-sm">
-        <i class="bi bi-printer me-2"></i> Cetak PDF
-    </button>
+    <div class="d-flex flex-column flex-md-row gap-2">
+        <a href="{% url 'export_assets_csv' %}" class="btn btn-success rounded-pill px-4 py-2 shadow-sm text-center" style="height: fit-content;">
+            <i class="bi bi-filetype-csv me-1"></i> Export CSV
+        </a>
+        
+        <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 py-2 shadow-sm text-center" style="height: fit-content;">
+            <i class="bi bi-printer me-1"></i> TEST CETAK AJA
+        </button>
     </div>
 </div>
 

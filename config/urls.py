@@ -13,7 +13,9 @@ from assets.views import (
     reports_view,
     settings_view,
     delete_master_data, # Tambahin ini biar gak perlu nulis 'views.delete_master_data'
-    export_assets_csv   # Pake yang ini, JANGAN export_excel
+    export_assets_csv,   # Pake yang ini, JANGAN export_excel
+    import_assets_excel,
+    download_excel_template
 )
 
 urlpatterns = [
@@ -41,4 +43,8 @@ urlpatterns = [
 
     # Export CSV (Ini yang bener)
     path('reports/export/csv/', export_assets_csv, name='export_assets_csv'),
+
+    # Untuk import data
+    path('inventory/import/', import_assets_excel, name='import_assets_excel'),
+    path('inventory/import/template/', download_excel_template, name='download_excel_template'),
 ]

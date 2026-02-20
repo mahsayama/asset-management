@@ -34,7 +34,7 @@ class Asset(models.Model):
     # --- FIELD DATA UTAMA ---
     name = models.CharField(max_length=200, verbose_name="Nama Aset") 
     barcode_id = models.CharField(max_length=100, verbose_name="ID Barcode", blank=True, null=True)
-    serial_number = models.CharField(max_length=100, unique=True, verbose_name="Nomor Seri")
+    serial_number = models.CharField(max_length=100, verbose_name="Nomor Seri")
     
     # --- PERUBAHAN DISINI: Pake ForeignKey ke Model Baru ---
     kategori = models.ForeignKey(Kategori, on_delete=models.SET_NULL, null=True, blank=True)

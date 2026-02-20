@@ -1,5 +1,6 @@
 import csv
-import json  # <--- JANGAN LUPA INI
+import json  
+import pandas as pd
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.db.models import Q, Sum, Count
@@ -309,3 +310,104 @@ def delete_master_data(request, tipe, pk):
         elif tipe == 'lokasi':
             get_object_or_404(Lokasi, pk=pk).delete()
     return redirect('settings')
+
+# 10. DOWNLOAD TEMPLATE EXCEL
+@login_required
+def download_excel_template(request):
+    # FIX: Tambahin kolom 'Departemen Saat Ini' di sini
+    df = pd.DataFrame(columns=[
+        'Nama Aset', 'Serial Number', 'Barcode', 'Kategori', 'Lokasi', 
+        'User Saat Ini', 'Departemen Saat Ini', 'Status (Tersedia/Dipakai/Rusak/Maintenance)', 'Harga'
+    ])
+    
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="template_import_aset.xlsx"'
+    df.to_excel(response, index=False)
+    return response
+
+# 11. PROSES IMPORT EXCEL
+@login_required
+def import_assets_excel(request):
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        
+        try:
+            # FIX 1: Pake dtype=str biar pandas gak sok tau motong angka 0 di depan
+            df = pd.read_excel(excel_file, dtype=str)
+            
+            # FIX 2: Ubah semua cell kosong (NaN) jadi string kosong biasa
+            df = df.fillna('')
+            
+            success_count = 0
+            
+            with transaction.atomic():
+                for index, row in df.iterrows():
+                    nama_aset = str(row.get('Nama Aset', '')).strip()
+                    if not nama_aset:
+                        continue 
+                        
+                    sn = str(row.get('Serial Number', '')).strip()
+                    barcode = str(row.get('Barcode', '')).strip() # Sekarang 04250001 tetep utuh!
+                    kategori_nama = str(row.get('Kategori', '')).strip()
+                    lokasi_nama = str(row.get('Lokasi', '')).strip()
+                    user_saat_ini = str(row.get('User Saat Ini', '')).strip()
+                    dept_saat_ini = str(row.get('Departemen Saat Ini', '')).strip()
+                    
+                    # --- FIX STATUS SESUAI MODELS.PY LO ---
+                    status_raw = str(row.get('Status (Tersedia/Dipakai/Rusak/Maintenance)', '')).strip().lower()
+                    
+                    if 'dipakai' in status_raw:
+                        status_db = 'DIPAKAI'
+                    elif 'rusak' in status_raw:
+                        status_db = 'RUSAK'
+                    elif 'hilang' in status_raw:
+                        status_db = 'HILANG'
+                    else:
+                        status_db = 'TERSEDIA' # Default-nya Tersedia
+                    # ---------------------------------------
+
+                    # Bonus FIX: Biar kalau ada user nulis harga '5.000.000' gak error
+                    harga_raw = str(row.get('Harga', '0')).replace('.', '').replace(',', '').strip()
+                    # ... lanjut ke bawahnya ...
+
+                    # Bonus FIX 4: Biar kalau ada user nulis harga '5.000.000' gak error
+                    harga_raw = str(row.get('Harga', '0')).replace('.', '').replace(',', '').strip()
+                    try:
+                        harga = int(harga_raw)
+                    except ValueError:
+                        harga = 0
+
+                    kategori_obj = None
+                    if kategori_nama:
+                        kategori_obj, _ = Kategori.objects.get_or_create(nama=kategori_nama)
+                        
+                    lokasi_obj = None
+                    if lokasi_nama:
+                        lokasi_obj, _ = Lokasi.objects.get_or_create(nama=lokasi_nama)
+
+                    asset = Asset.objects.create(
+                        name=nama_aset,
+                        serial_number=sn,
+                        barcode_id=barcode,
+                        kategori=kategori_obj,
+                        lokasi=lokasi_obj,
+                        current_user=user_saat_ini,
+                        current_dept=dept_saat_ini,
+                        status=status_db, # Save pake bahasa manusia
+                        price=harga
+                    )
+                    
+                    AssetHistory.objects.create(
+                        asset=asset,
+                        changed_by=request.user,
+                        description="Aset ditambahkan massal via Import Excel."
+                    )
+                    success_count += 1
+
+            messages.success(request, f"Mantap! Berhasil import {success_count} data aset baru.")
+            
+        except Exception as e:
+            print("ERROR IMPORT EXCEL:", str(e)) 
+            messages.error(request, f"Gagal import data. Error: {str(e)}")
+            
+    return redirect('asset_list')
