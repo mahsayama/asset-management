@@ -122,6 +122,7 @@ deploy_production:
         docker run -d -p 80:8000 \
           --name web-production \
           --network asset-network \
+          -e SECRET_KEY="$SECRET_KEY" \
           -e DB_HOST=db-production \
           -e DB_NAME=asset_db \
           -e DB_USER=mahsaserver \
