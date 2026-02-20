@@ -81,7 +81,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        # Ambil dari environment CI/CD, kalau kosong pakai default lokal lo
         'NAME': os.environ.get('DB_NAME', 'asset_db'),       
         'USER': os.environ.get('DB_USER', 'postgres'),       
         'PASSWORD': os.environ.get('DB_PASSWORD'), 

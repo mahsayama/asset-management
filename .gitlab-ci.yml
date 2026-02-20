@@ -82,6 +82,7 @@ deploy_staging:
         docker run -d -p 8080:8000 \
           --name web-staging \
           --network asset-network \
+          -e SECRET_KEY="$SECRET_KEY" \
           -e DB_HOST=db-staging \
           -e DB_NAME=asset_db \
           -e DB_USER=mahsaserver \
