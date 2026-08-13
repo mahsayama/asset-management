@@ -61,5 +61,5 @@ CREATE TABLE IF NOT EXISTS asset_history (
 
 -- Insert default admin user (password: admin123)
 INSERT INTO users (name, email, password, role) VALUES 
-('admin', 'admin@mahsa.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin')
+('admin', 'admin@mahsa.com', '$2y$10$mDugWpQaJcknZm7LulCjh.MTe6.YVYUX0PZT3vsPTtG5.3ZSAJ6d6', 'admin')
 ON CONFLICT (email) DO NOTHING;
