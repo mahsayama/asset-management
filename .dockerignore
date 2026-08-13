@@ -1,0 +1,13 @@
+.git
+.vscode
+vendor
+node_modules
+.env
+*.md
+*.sql
+*.sqlite3
+docker-compose.yml
+dockerfile
+.gitignore
+.gitlab-ci.yml
+DOCUMENTATION

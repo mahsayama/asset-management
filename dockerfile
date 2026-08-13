@@ -32,7 +32,12 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # 7. Install PHP dependencies & set permission
-RUN composer install --no-dev --optimize-autoloader \
+# Use composer update if no lock file exists, otherwise composer install
+RUN if [ -f composer.lock ]; then \
+        composer install --no-dev --optimize-autoloader; \
+    else \
+        composer update --no-dev --optimize-autoloader; \
+    fi \
     && chown -R www-data:www-data /var/www/html
 
 # 8. Expose port 8000
