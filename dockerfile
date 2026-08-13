@@ -31,7 +31,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . /var/www/html
 
-# 7. Install PHP dependencies & set permission
+# 7. Create session directory & set permissions
+RUN mkdir -p /tmp/ci_sessions && chown -R www-data:www-data /tmp/ci_sessions
+
+# 8. Install PHP dependencies & set permission
 # Use composer update if no lock file exists, otherwise composer install
 RUN if [ -f composer.lock ]; then \
         composer install --no-dev --optimize-autoloader; \
@@ -40,9 +43,9 @@ RUN if [ -f composer.lock ]; then \
     fi \
     && chown -R www-data:www-data /var/www/html
 
-# 8. Expose port 8000
+# 9. Expose port 8000
 RUN sed -i 's/80/8000/g' /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 EXPOSE 8000
 
-# 9. Perintah utama
+# 10. Perintah utama
 CMD ["apache2-foreground"]
