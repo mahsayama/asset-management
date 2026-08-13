@@ -12,45 +12,38 @@ stages:
   - test
   - deploy
 
-# --- STAGE 1: BUILD (Aman, gak berubah) ---
+# --- STAGE 1: BUILD ---
 build_image:
   stage: build
   script:
     - echo "Login ke GitLab Registry..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - echo "Build Docker Image..."
+    - echo "Build Docker Image untuk CodeIgniter 3 App..."
     - docker build -t $IMAGE_TAG -t $LATEST_TAG .
     - echo "Push Image ke Registry..."
     - docker push $IMAGE_TAG
     - docker push $LATEST_TAG
 
-# --- STAGE 2: UNIT TESTING (Perlu Service Postgres Sementara) ---
+# --- STAGE 2: APPLICATION TESTING ---
 test_application:
   stage: test
-  image: python:3.12-slim
-  # Kita butuh service postgres buat testing di GitLab Runner
+  image: php:7.4-cli
   services:
     - name: postgres:15
       alias: postgres
   variables:
-    # FIX 1: Samain nama DB dan User dengan yang ada di settings.py
     POSTGRES_DB: asset_db
     POSTGRES_USER: postgres
     POSTGRES_PASSWORD: password
     POSTGRES_HOST_AUTH_METHOD: trust
-    
-    # FIX 2: Kasih tau Django buat connect ke service postgres ini
-    DB_HOST: postgres
-    DB_NAME: asset_db
-    DB_USER: postgres
-    DB_PASSWORD: password
-    
-    # FIX 3: Tambahin Dummy Secret Key biar Django mau jalan di GitLab Runner
-    SECRET_KEY: "rahasia-dummy-buat-testing-doang"
   script:
-    - apt-get update && apt-get install -y gcc libpq-dev  # Install driver di runner
-    - pip install -r requirements.txt
-    - python manage.py test
+    - apt-get update && apt-get install -y git unzip libpq-dev libsqlite3-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev
+    - docker-php-ext-configure gd --with-freetype --with-jpeg
+    - docker-php-ext-install pdo pdo_pgsql pdo_sqlite pgsql mysqli zip gd bcmath
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - composer install --prefer-dist --no-progress --no-interaction
+    - echo "Testing CodeIgniter 3 Application Boot..."
+    - php index.php
 
 # --- STAGE 3: DEPLOY STAGING ---
 deploy_staging:
@@ -75,22 +68,15 @@ deploy_staging:
         docker rm web-staging || true;
         docker pull $IMAGE_TAG;
         
-        # PERUBAHAN UTAMA DI SINI:
-        # 1. Connect ke network yg sama dgn DB (--network asset-network)
-        # 2. Inject Env Variable DB (-e ...)
-        # 3. Gak pake -v sqlite lagi
         docker run -d -p 8080:8000 \
           --name web-staging \
           --network asset-network \
-          -e SECRET_KEY='$SECRET_KEY' \
+          -e DB_CONNECTION=pgsql \
           -e DB_HOST=db-staging \
-          -e DB_NAME=asset_db \
-          -e DB_USER=mahsaserver \
+          -e DB_DATABASE=asset_db \
+          -e DB_USERNAME=mahsaserver \
           -e DB_PASSWORD=rahasia_staging \
           $IMAGE_TAG;
-          
-        docker exec web-staging python manage.py migrate;
-        docker exec web-staging python manage.py collectstatic --noinput;
       "
 
 # --- STAGE 4: DEPLOY PRODUCTION ---
@@ -118,17 +104,13 @@ deploy_production:
         docker rm web-production || true;
         docker pull $IMAGE_TAG;
         
-        # CONFIG PROD JUGA SAMA:
         docker run -d -p 80:8000 \
           --name web-production \
           --network asset-network \
-          -e SECRET_KEY='$SECRET_KEY' \
+          -e DB_CONNECTION=pgsql \
           -e DB_HOST=db-production \
-          -e DB_NAME=asset_db \
-          -e DB_USER=mahsaserver \
+          -e DB_DATABASE=asset_db \
+          -e DB_USERNAME=mahsaserver \
           -e DB_PASSWORD=rahasia_prod \
           $IMAGE_TAG;
-          
-        docker exec web-production python manage.py migrate;
-        docker exec web-production python manage.py collectstatic --noinput;
       "
