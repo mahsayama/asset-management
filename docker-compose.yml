@@ -44,6 +44,7 @@ services:
       - POSTGRES_INITDB_ARGS=--data-checksums
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
     command: >
       postgres
       -c shared_buffers=128MB
